@@ -1,91 +1,216 @@
-import { NitroRectangle, TextureUtils } from '@nitrots/nitro-renderer';
-import { FC, useRef } from 'react';
-import { FaTimes } from 'react-icons/fa';
-import { CameraPicture, CreateLinkEvent, GetRoomEngine, GetRoomSession, LocalizeText, PlaySound, SoundNames } from '../../../api';
-import { Column, DraggableWindowCamera, Flex } from '../../../common';
-import { useCamera, useNotification } from '../../../hooks';
+import { NitroRectangle, TextureUtils } from "@nitrots/nitro-renderer";
+import { FC, useRef } from "react";
+import { FaTimes } from "react-icons/fa";
+import {
+	CameraPicture,
+	CreateLinkEvent,
+	GetRoomEngine,
+	GetRoomSession,
+	LocalizeText,
+	PlaySound,
+	SoundNames,
+} from "../../../api";
+import { Column, DraggableWindowCamera, Flex, Button } from "../../../common";
+import { useCamera, useNotification } from "../../../hooks";
 
-export interface CameraWidgetCaptureViewProps
-{
-    onClose: () => void;
-    onEdit: () => void;
-    onDelete: () => void;
+export interface CameraWidgetCaptureViewProps {
+	onClose: () => void;
+	onEdit: () => void;
+	onDelete: () => void;
 }
 
 const CAMERA_ROLL_LIMIT: number = 5;
 
-export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = props =>
-{
-    const { onClose = null, onEdit = null, onDelete = null } = props;
-    const { cameraRoll = null, setCameraRoll = null, selectedPictureIndex = -1, setSelectedPictureIndex = null } = useCamera();
-    const { simpleAlert = null } = useNotification();
-    const elementRef = useRef<HTMLDivElement>();
+export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = (
+	props
+) => {
+	const { onClose = null, onEdit = null, onDelete = null } = props;
+	const {
+		cameraRoll = null,
+		setCameraRoll = null,
+		selectedPictureIndex = -1,
+		setSelectedPictureIndex = null,
+	} = useCamera();
+	const { simpleAlert = null } = useNotification();
+	const elementRef = useRef<HTMLDivElement>();
 
-    const selectedPicture = ((selectedPictureIndex > -1) ? cameraRoll[selectedPictureIndex] : null);
+	const selectedPicture =
+		selectedPictureIndex > -1 ? cameraRoll[selectedPictureIndex] : null;
 
-    const getCameraBounds = () =>
-    {
-        if(!elementRef || !elementRef.current) return null;
+	const getCameraBounds = () => {
+		if (!elementRef || !elementRef.current) return null;
 
-        const frameBounds = elementRef.current.getBoundingClientRect();
-        
-        return new NitroRectangle(Math.floor(frameBounds.x), Math.floor(frameBounds.y), Math.floor(frameBounds.width), Math.floor(frameBounds.height));
-    }
+		const frameBounds = elementRef.current.getBoundingClientRect();
 
-    const takePicture = () =>
-    {
-        if(selectedPictureIndex > -1)
-        {
-            setSelectedPictureIndex(-1);
-            return;
-        }
+		return new NitroRectangle(
+			Math.floor(frameBounds.x),
+			Math.floor(frameBounds.y),
+			Math.floor(frameBounds.width),
+			Math.floor(frameBounds.height)
+		);
+	};
 
-        const texture = GetRoomEngine().createTextureFromRoom(GetRoomSession().roomId, 1, getCameraBounds());
+	const takePicture = () => {
+		if (selectedPictureIndex > -1) {
+			setSelectedPictureIndex(-1);
+			return;
+		}
 
-        const clone = [ ...cameraRoll ];
+		const texture = GetRoomEngine().createTextureFromRoom(
+			GetRoomSession().roomId,
+			1,
+			getCameraBounds()
+		);
 
-        if(clone.length >= CAMERA_ROLL_LIMIT)
-        {
-            simpleAlert(LocalizeText('camera.full.body'));
+		const clone = [...cameraRoll];
 
-            clone.pop();
-        }
+		if (clone.length >= CAMERA_ROLL_LIMIT) {
+			simpleAlert(LocalizeText("camera.full.body"));
 
-        PlaySound(SoundNames.CAMERA_SHUTTER);
-        clone.push(new CameraPicture(texture, TextureUtils.generateImageUrl(texture)));
+			clone.pop();
+		}
 
-        setCameraRoll(clone);
-    }
+		PlaySound(SoundNames.CAMERA_SHUTTER);
+		clone.push(
+			new CameraPicture(texture, TextureUtils.generateImageUrl(texture))
+		);
 
-    return (
-        <DraggableWindowCamera uniqueKey="nitro-camera-capture">
-            <Column center className="nitro-camera-capture" gap={ 0 }>
-                { selectedPicture && <img alt="" className="camera-area" src={ selectedPicture.imageUrl } /> }
-                <div className="camera-canvas drag-handler">
-					<div className="position-absolute info-camera" onClick={ () => CreateLinkEvent('habbopages/camera') }></div>
-                    <div className="position-absolute header-close" onClick={ onClose }>
-                        <FaTimes className="fa-icon" />
-                    </div>
-                    { !selectedPicture && <div ref={ elementRef } className="camera-area camera-view-finder" /> }
-                    { selectedPicture && 
-                        <div className="camera-area camera-frame">
-                            <div className="camera-frame-preview-actions w-100 position-absolute bottom-0 py-2 text-center">
-                                <button className="btn btn-success me-3" title={ LocalizeText('camera.editor.button.tooltip') } onClick={ onEdit }>{ LocalizeText('camera.editor.button.text') }</button>
-                                <button className="btn btn-danger" onClick={ onDelete }>{ LocalizeText('camera.delete.button.text') }</button>
-                            </div>
-                        </div> }
-                    <div className="d-flex justify-content-center">
-                        <div className="camera-button" title={ LocalizeText('camera.take.photo.button.tooltip') } onClick={ takePicture } />
-                    </div>
-                </div>
-                { (cameraRoll.length > 0) &&
-                    <Flex gap={ 2 } justifyContent="center" className="camera-roll d-flex justify-content-center py-2">
-                        { cameraRoll.map((picture, index) =>
-                        {
-                            return <img alt="" key={ index } src={ picture.imageUrl } onClick={ event => setSelectedPictureIndex(index) } />;
-                        }) }
-                    </Flex> }
-            </Column>
-        </DraggableWindowCamera>
-    );
-}
+		setCameraRoll(clone);
+	};
+
+	return (
+		<>
+			<DraggableWindowCamera uniqueKey="camera-capture">
+				{selectedPicture && (
+					<img className="preview" src={selectedPicture.imageUrl} />
+				)}
+				<div className="card  drag-handler">
+					<div className="header">
+						<h2>{LocalizeText("camera.interface.title")}</h2>
+						<div className="actions">
+							<div className="actions">
+								<button
+									onClick={() =>
+										CreateLinkEvent(
+											"habbopages/help/camera"
+										)
+									}
+									className="info"
+								></button>
+
+								<button
+									onClick={onClose}
+									className="close"
+								></button>
+							</div>
+						</div>
+					</div>
+					{!selectedPicture && <div className="lens"></div>}
+					{selectedPicture && (
+						<div className="edit">
+							<Button
+								title={LocalizeText(
+									"camera.editor.button.tooltip"
+								)}
+								variant="primary"
+								shadow
+								width={49}
+								onClick={onEdit}
+							>
+								{LocalizeText("camera.editor.button.text")}
+							</Button>
+						</div>
+					)}
+					<button
+						title={LocalizeText("camera.take.photo.button.tooltip")}
+						className="capture"
+						onClick={takePicture}
+					/>
+				</div>
+			</DraggableWindowCamera>
+			<DraggableWindowCamera uniqueKey="nitro-camera-capture">
+				<Column center className="nitro-camera-capture" gap={0}>
+					{selectedPicture && (
+						<img
+							alt=""
+							className="camera-area"
+							src={selectedPicture.imageUrl}
+						/>
+					)}
+					<div className="camera-canvas drag-handler">
+						<div
+							className="position-absolute info-camera"
+							onClick={() => CreateLinkEvent("habbopages/camera")}
+						></div>
+						<div
+							className="position-absolute header-close"
+							onClick={onClose}
+						>
+							<FaTimes className="fa-icon" />
+						</div>
+						{!selectedPicture && (
+							<div
+								ref={elementRef}
+								className="camera-area camera-view-finder"
+							/>
+						)}
+						{selectedPicture && (
+							<div className="camera-area camera-frame">
+								<div className="camera-frame-preview-actions w-100 position-absolute bottom-0 py-2 text-center">
+									<button
+										className="btn btn-success me-3"
+										title={LocalizeText(
+											"camera.editor.button.tooltip"
+										)}
+										onClick={onEdit}
+									>
+										{LocalizeText(
+											"camera.editor.button.text"
+										)}
+									</button>
+									<button
+										className="btn btn-danger"
+										onClick={onDelete}
+									>
+										{LocalizeText(
+											"camera.delete.button.text"
+										)}
+									</button>
+								</div>
+							</div>
+						)}
+						<div className="d-flex justify-content-center">
+							<div
+								className="camera-button"
+								title={LocalizeText(
+									"camera.take.photo.button.tooltip"
+								)}
+								onClick={takePicture}
+							/>
+						</div>
+					</div>
+					{cameraRoll.length > 0 && (
+						<Flex
+							gap={2}
+							justifyContent="center"
+							className="camera-roll d-flex justify-content-center py-2"
+						>
+							{cameraRoll.map((picture, index) => {
+								return (
+									<img
+										alt=""
+										key={index}
+										src={picture.imageUrl}
+										onClick={(event) =>
+											setSelectedPictureIndex(index)
+										}
+									/>
+								);
+							})}
+						</Flex>
+					)}
+				</Column>
+			</DraggableWindowCamera>
+		</>
+	);
+};

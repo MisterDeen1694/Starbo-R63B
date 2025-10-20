@@ -1,0 +1,169 @@
+%starbo-card-actions {
+	position: absolute;
+	right: 4px;
+	top: 5px;
+	display: flex;
+	gap: 6px;
+
+	& button {
+		outline: none;
+		background: unset;
+		border: none;
+	}
+
+	.report {
+		cursor: pointer;
+		@include sprite(1, 7, "starbo-card");
+		width: 19px;
+		height: 20px;
+
+		&:hover {
+			@include sprite(1, 8, "starbo-card");
+		}
+
+		&:active {
+			@include sprite(1, 9, "starbo-card");
+		}
+	}
+
+	.info {
+		cursor: pointer;
+		width: 19px;
+		height: 20px;
+		@include sprite(1, 4, "starbo-card");
+
+		&:hover {
+			@include sprite(1, 5, "starbo-card");
+		}
+
+		&:active {
+			@include sprite(1, 6, "starbo-card");
+		}
+	}
+
+	.close {
+		cursor: pointer;
+		width: 19px;
+		height: 20px;
+		@include sprite(1, 1, "starbo-card");
+
+		&:hover {
+			@include sprite(1, 2, "starbo-card");
+		}
+
+		&:active {
+			@include sprite(1, 3, "starbo-card");
+		}
+	}
+}
+
+.header.color-primary {
+	--card-header-background: rgb(54, 120, 151);
+	--card-header-border: rgb(64, 140, 175);
+}
+
+.starbo-card {
+	&.primary {
+		background: #e9e9e1;
+		border-radius: 8px;
+		border: 1px solid black;
+		overflow: clip;
+
+		& .header {
+			position: relative;
+			height: 32px;
+			background: var(--card-header-background);
+			border: 2px solid var(--card-header-border);
+			border-bottom: 1px solid black;
+			border-radius: 7px 7px 0px 0px;
+			align-content: center;
+			display: grid;
+
+			& h2 {
+				justify-self: center;
+				margin: 0px;
+				color: white;
+				font-size: 12px;
+				@include ubuntu(bold);
+			}
+			& .actions {
+				@extend %starbo-card-actions;
+			}
+		}
+
+		& .body {
+			height: calc(100% - 32px);
+			width: 100%;
+			border-radius: 0px 0px 7px 7px;
+			border: 2px solid white;
+			border-top: unset;
+
+			&.columns {
+				display: flex;
+				flex-wrap: nowrap;
+				flex-direction: row;
+				justify-content: space-between;
+
+				& > div {
+					flex-grow: 1;
+				}
+			}
+
+			& .sub-header {
+				transform: translateX(-2px);
+				align-content: end;
+
+				& .tabs {
+					width: 100%;
+					background-color: rgb(233, 233, 225);
+					height: 33px;
+					border-bottom: 1px solid black;
+					display: flex;
+					padding-top: 2px;
+					padding-inline: 8px;
+
+					& .tab {
+						padding: 9px 12px;
+						background-color: rgb(195, 194, 184);
+						color: black;
+						z-index: 1;
+						margin-bottom: -1px;
+						border: 1px solid;
+						border-color: rgb(80, 79, 78) rgb(80, 79, 78)
+							rgb(0, 0, 0);
+						border-radius: 7px 7px 0px 0px;
+						position: relative;
+						cursor: pointer;
+						display: flex;
+						justify-content: center;
+						overflow: hidden;
+
+						& .inner {
+							display: flex;
+							justify-content: center;
+							align-items: center;
+						}
+
+						&::before {
+							content: "";
+							position: absolute;
+							border-radius: 3px;
+							margin: auto;
+							inset: 4px 4px -2px;
+							z-index: 1;
+						}
+
+						&.active {
+							background-color: rgb(236, 234, 224);
+							border: none;
+							&:before {
+								box-shadow: 0 0 0 2px rgb(255, 255, 255),
+									0 0 0 4px rgb(0, 0, 0);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

@@ -1,356 +1,489 @@
-import { AvatarEditorFigureCategory, FigureSetIdsMessageEvent, GetWardrobeMessageComposer, IAvatarFigureContainer, ILinkEventTracker, SetClothingChangeDataMessageComposer, UserFigureComposer, UserWardrobePageEvent } from '@nitrots/nitro-renderer';
-import { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { FaDice, FaTrash, FaUndo } from 'react-icons/fa';
-import { AddEventLinkTracker, AvatarEditorAction, AvatarEditorUtilities, BodyModel, FigureData, GetAvatarRenderManager, GetClubMemberLevel, GetConfiguration, GetSessionDataManager, HeadModel, IAvatarEditorCategoryModel, LegModel, LocalizeText, RemoveLinkEventTracker, SendMessageComposer, SetLocalStorage, TorsoModel, generateRandomFigure } from '../../api';
-import { Button, ButtonGroup, Column, Flex, Grid, NitroCardContentView, NitroCardHeaderView, NitroCardTabsItemView, NitroCardTabsView, NitroCardView } from '../../common';
-import { useMessageEvent } from '../../hooks';
-import { AvatarEditorFigurePreviewView } from './views/AvatarEditorFigurePreviewView';
-import { AvatarEditorModelView } from './views/AvatarEditorModelView';
-import { AvatarEditorWardrobeView } from './views/AvatarEditorWardrobeView';
+import {
+	AvatarEditorFigureCategory,
+	FigureSetIdsMessageEvent,
+	GetWardrobeMessageComposer,
+	IAvatarFigureContainer,
+	ILinkEventTracker,
+	SetClothingChangeDataMessageComposer,
+	UserFigureComposer,
+	UserWardrobePageEvent,
+} from "@nitrots/nitro-renderer";
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import {
+	AddEventLinkTracker,
+	AvatarEditorAction,
+	AvatarEditorUtilities,
+	BodyModel,
+	FigureData,
+	GetAvatarRenderManager,
+	GetClubMemberLevel,
+	GetConfiguration,
+	GetSessionDataManager,
+	HeadModel,
+	IAvatarEditorCategoryModel,
+	LegModel,
+	LocalizeText,
+	RemoveLinkEventTracker,
+	SendMessageComposer,
+	SetLocalStorage,
+	TorsoModel,
+	generateRandomFigure,
+} from "../../api";
+import { Button, StarboCard } from "../../common";
+import { useMessageEvent } from "../../hooks";
+import { AvatarEditorFigurePreviewView } from "./views/AvatarEditorFigurePreviewView";
+import { AvatarEditorModelView } from "./views/AvatarEditorModelView";
+import { AvatarEditorWardrobeView } from "./views/AvatarEditorWardrobeView";
 
-const DEFAULT_MALE_FIGURE: string = 'hr-100.hd-180-7.ch-215-66.lg-270-79.sh-305-62.ha-1002-70.wa-2007';
-const DEFAULT_FEMALE_FIGURE: string = 'hr-515-33.hd-600-1.ch-635-70.lg-716-66-62.sh-735-68';
+const { Header, Body, Column, Subheader, Tabs, Tab, Content } = StarboCard;
 
-export const AvatarEditorView: FC<{}> = props =>
-{
-    const [ isVisible, setIsVisible ] = useState(false);
-    const [ figures, setFigures ] = useState<Map<string, FigureData>>(null);
-    const [ figureData, setFigureData ] = useState<FigureData>(null);
-    const [ categories, setCategories ] = useState<Map<string, IAvatarEditorCategoryModel>>(null);
-    const [ activeCategory, setActiveCategory ] = useState<IAvatarEditorCategoryModel>(null);
-    const [ figureSetIds, setFigureSetIds ] = useState<number[]>([]);
-    const [ boundFurnitureNames, setBoundFurnitureNames ] = useState<string[]>([]);
-    const [ savedFigures, setSavedFigures ] = useState<[ IAvatarFigureContainer, string ][]>([]);
-    const [ isWardrobeVisible, setIsWardrobeVisible ] = useState(false);
-    const [ lastFigure, setLastFigure ] = useState<string>(null);
-    const [ lastGender, setLastGender ] = useState<string>(null);
-    const [ needsReset, setNeedsReset ] = useState(true);
-    const [ isInitalized, setIsInitalized ] = useState(false);
-    const [ genderFootballGate, setGenderFootballGate ] = useState<string>(null);
-    const [ objectFootballGate, setObjectFootballGate ] = useState<number>(null);
-    
-    const DEFAULT_MALE_FOOTBALL_GATE = JSON.parse(window.localStorage.getItem('nitro.look.footballgate.M')) || 'ch-3109-92-1408.lg-3116-82-1408.sh-3115-1408-1408';
-    const DEFAULT_FEMALE_FOOTBALL_GATE = JSON.parse(window.localStorage.getItem('nitro.look.footballgate.F')) || 'ch-3112-1408-1408.lg-3116-71-1408.sh-3115-1408-1408';
-    const maxWardrobeSlots = useMemo(() => GetConfiguration<number>('avatar.wardrobe.max.slots', 10), []);
-	
-    const onClose = () =>
-    {
-        setGenderFootballGate(null);
-        setObjectFootballGate(null);
-        setIsVisible(false);
-    }
+const DEFAULT_MALE_FIGURE: string =
+	"hr-100.hd-180-7.ch-215-66.lg-270-79.sh-305-62.ha-1002-70.wa-2007";
+const DEFAULT_FEMALE_FIGURE: string =
+	"hr-515-33.hd-600-1.ch-635-70.lg-716-66-62.sh-735-68";
 
-    useMessageEvent<FigureSetIdsMessageEvent>(FigureSetIdsMessageEvent, event =>
-    {
-        const parser = event.getParser();
+export const AvatarEditorView: FC<{}> = (props) => {
+	const [isVisible, setIsVisible] = useState(false);
+	const [figures, setFigures] = useState<Map<string, FigureData>>(null);
+	const [figureData, setFigureData] = useState<FigureData>(null);
+	const [categories, setCategories] =
+		useState<Map<string, IAvatarEditorCategoryModel>>(null);
+	const [activeCategory, setActiveCategory] =
+		useState<IAvatarEditorCategoryModel>(null);
+	const [figureSetIds, setFigureSetIds] = useState<number[]>([]);
+	const [boundFurnitureNames, setBoundFurnitureNames] = useState<string[]>(
+		[]
+	);
+	const [savedFigures, setSavedFigures] = useState<
+		[IAvatarFigureContainer, string][]
+	>([]);
+	const [isWardrobeVisible, setIsWardrobeVisible] = useState(true);
+	const [lastFigure, setLastFigure] = useState<string>(null);
+	const [lastGender, setLastGender] = useState<string>(null);
+	const [needsReset, setNeedsReset] = useState(true);
+	const [isInitalized, setIsInitalized] = useState(false);
+	const [genderFootballGate, setGenderFootballGate] = useState<string>(null);
+	const [objectFootballGate, setObjectFootballGate] = useState<number>(null);
 
-        setFigureSetIds(parser.figureSetIds);
-        setBoundFurnitureNames(parser.boundsFurnitureNames);
-    });
+	const DEFAULT_MALE_FOOTBALL_GATE =
+		JSON.parse(window.localStorage.getItem("nitro.look.footballgate.M")) ||
+		"ch-3109-92-1408.lg-3116-82-1408.sh-3115-1408-1408";
+	const DEFAULT_FEMALE_FOOTBALL_GATE =
+		JSON.parse(window.localStorage.getItem("nitro.look.footballgate.F")) ||
+		"ch-3112-1408-1408.lg-3116-71-1408.sh-3115-1408-1408";
+	const maxWardrobeSlots = useMemo(
+		() => GetConfiguration<number>("avatar.wardrobe.max.slots", 10),
+		[]
+	);
 
-    useMessageEvent<UserWardrobePageEvent>(UserWardrobePageEvent, event =>
-    {
-        const parser = event.getParser();
-        const savedFigures: [ IAvatarFigureContainer, string ][] = [];
+	const onClose = () => {
+		setGenderFootballGate(null);
+		setObjectFootballGate(null);
+		setIsVisible(false);
+	};
 
-        let i = 0;
+	useMessageEvent<FigureSetIdsMessageEvent>(
+		FigureSetIdsMessageEvent,
+		(event) => {
+			const parser = event.getParser();
 
-        while(i < maxWardrobeSlots)
-        {
-            savedFigures.push([ null, null ]);
+			setFigureSetIds(parser.figureSetIds);
+			setBoundFurnitureNames(parser.boundsFurnitureNames);
+		}
+	);
 
-            i++;
-        }
-  
-        for(let [ index, [ look, gender ] ] of parser.looks.entries())
-        {
-            const container = GetAvatarRenderManager().createFigureContainer(look);
+	useMessageEvent<UserWardrobePageEvent>(UserWardrobePageEvent, (event) => {
+		const parser = event.getParser();
+		const savedFigures: [IAvatarFigureContainer, string][] = [];
 
-            savedFigures[(index - 1)] = [ container, gender ];
-        }
+		let i = 0;
 
-        setSavedFigures(savedFigures);
-    });
+		while (i < maxWardrobeSlots) {
+			savedFigures.push([null, null]);
 
-    const selectCategory = useCallback((name: string) =>
-    {
-        if(!categories) return;
+			i++;
+		}
 
-        setActiveCategory(categories.get(name));
-    }, [ categories ]);
+		for (let [index, [look, gender]] of parser.looks.entries()) {
+			const container =
+				GetAvatarRenderManager().createFigureContainer(look);
 
-    const resetCategories = useCallback(() =>
-    {
-        const categories = new Map();
+			savedFigures[index - 1] = [container, gender];
+		}
 
-        if (!genderFootballGate)
-        {
-            categories.set(AvatarEditorFigureCategory.GENERIC, new BodyModel());
-            categories.set(AvatarEditorFigureCategory.HEAD, new HeadModel());
-            categories.set(AvatarEditorFigureCategory.TORSO, new TorsoModel());
-            categories.set(AvatarEditorFigureCategory.LEGS, new LegModel());
-        }
-        else
-        {
-            categories.set(AvatarEditorFigureCategory.TORSO, new TorsoModel());
-            categories.set(AvatarEditorFigureCategory.LEGS, new LegModel());
-        }
+		setSavedFigures(savedFigures);
+	});
 
-        setCategories(categories);
-    }, [ genderFootballGate ]);
+	const selectCategory = useCallback(
+		(name: string) => {
+			if (!categories) return;
 
-    const setupFigures = useCallback(() =>
-    {
-        const figures: Map<string, FigureData> = new Map();
+			setActiveCategory(categories.get(name));
+		},
+		[categories]
+	);
 
-        const maleFigure = new FigureData();
-        const femaleFigure = new FigureData();
+	const resetCategories = useCallback(() => {
+		const categories = new Map();
 
-        maleFigure.loadAvatarData(DEFAULT_MALE_FIGURE, FigureData.MALE);
-        femaleFigure.loadAvatarData(DEFAULT_FEMALE_FIGURE, FigureData.FEMALE);
+		if (!genderFootballGate) {
+			categories.set(AvatarEditorFigureCategory.GENERIC, new BodyModel());
+			categories.set(AvatarEditorFigureCategory.HEAD, new HeadModel());
+			categories.set(AvatarEditorFigureCategory.TORSO, new TorsoModel());
+			categories.set(AvatarEditorFigureCategory.LEGS, new LegModel());
+			// categories.set(
+			// 	AvatarEditorFigureCategory.HOTLOOKS,
+			// 	new BodyModel()
+			// ); //TODO: ADD HOTLOOKS
+			// categories.set(AvatarEditorFigureCategory.EFFECTS, new BodyModel()); //TODO: ADD EFFECTS
+		} else {
+			categories.set(AvatarEditorFigureCategory.TORSO, new TorsoModel());
+			categories.set(AvatarEditorFigureCategory.LEGS, new LegModel());
+		}
 
-        figures.set(FigureData.MALE, maleFigure);
-        figures.set(FigureData.FEMALE, femaleFigure);
+		setCategories(categories);
+	}, [genderFootballGate]);
 
-        setFigures(figures);
-        setFigureData(figures.get(FigureData.MALE));
-    }, []);
+	const setupFigures = useCallback(() => {
+		const figures: Map<string, FigureData> = new Map();
 
-    const loadAvatarInEditor = useCallback((figure: string, gender: string, reset: boolean = true) =>
-    {
-        gender = AvatarEditorUtilities.getGender(gender);
+		const maleFigure = new FigureData();
+		const femaleFigure = new FigureData();
 
-        let newFigureData = figureData;
+		maleFigure.loadAvatarData(DEFAULT_MALE_FIGURE, FigureData.MALE);
+		femaleFigure.loadAvatarData(DEFAULT_FEMALE_FIGURE, FigureData.FEMALE);
 
-        if(gender !== newFigureData.gender) newFigureData = figures.get(gender);
+		figures.set(FigureData.MALE, maleFigure);
+		figures.set(FigureData.FEMALE, femaleFigure);
 
-        if(figure !== newFigureData.getFigureString()) newFigureData.loadAvatarData(figure, gender);
+		setFigures(figures);
+		setFigureData(figures.get(FigureData.MALE));
+	}, []);
 
-        if(newFigureData !== figureData) setFigureData(newFigureData);
+	const loadAvatarInEditor = useCallback(
+		(figure: string, gender: string, reset: boolean = true) => {
+			gender = AvatarEditorUtilities.getGender(gender);
 
-        if(reset)
-        {
-            setLastFigure(figureData.getFigureString());
-            setLastGender(figureData.gender);
-        }
-    }, [ figures, figureData ]);
+			let newFigureData = figureData;
 
-    const processAction = useCallback((action: string) =>
-    {
-        switch(action)
-        {
-            case AvatarEditorAction.ACTION_CLEAR:
-                loadAvatarInEditor(figureData.getFigureStringWithFace(0, false), figureData.gender, false);
-                resetCategories();
-                return;
-            case AvatarEditorAction.ACTION_RESET:
-                loadAvatarInEditor(lastFigure, lastGender);
-                resetCategories();
-                return;
-            case AvatarEditorAction.ACTION_RANDOMIZE:
-                const figure = generateRandomFigure(figureData, figureData.gender, GetClubMemberLevel(), figureSetIds, [ FigureData.FACE ]);
+			if (gender !== newFigureData.gender)
+				newFigureData = figures.get(gender);
 
-                loadAvatarInEditor(figure, figureData.gender, false);
-                resetCategories();
-                return;
-            case AvatarEditorAction.ACTION_SAVE:
-                !genderFootballGate ? SendMessageComposer(new UserFigureComposer(figureData.gender, figureData.getFigureString())) : SendMessageComposer(new SetClothingChangeDataMessageComposer(objectFootballGate, genderFootballGate, figureData.getFigureString()));
-                SetLocalStorage(`nitro.look.footballgate.${ genderFootballGate }`, figureData.getFigureString());
-                onClose();
-                return;
-        }
-    }, [ loadAvatarInEditor, figureData, resetCategories, lastFigure, lastGender, figureSetIds, genderFootballGate, objectFootballGate ])
+			if (figure !== newFigureData.getFigureString())
+				newFigureData.loadAvatarData(figure, gender);
 
-    const setGender = useCallback((gender: string) =>
-    {
-        gender = AvatarEditorUtilities.getGender(gender);
+			if (newFigureData !== figureData) setFigureData(newFigureData);
 
-        setFigureData(figures.get(gender));
-    }, [ figures ]);
+			if (reset) {
+				setLastFigure(figureData.getFigureString());
+				setLastGender(figureData.gender);
+			}
+		},
+		[figures, figureData]
+	);
 
-    useEffect(() =>
-    {
-        const linkTracker: ILinkEventTracker = {
-            linkReceived: (url: string) =>
-            {
-                const parts = url.split('/');
-	
-                setGenderFootballGate(parts[2] ? parts[2] : null);
-                setObjectFootballGate(parts[3] ? Number(parts[3]) : null);
+	const processAction = useCallback(
+		(action: string) => {
+			switch (action) {
+				case AvatarEditorAction.ACTION_CLEAR:
+					loadAvatarInEditor(
+						figureData.getFigureStringWithFace(0, false),
+						figureData.gender,
+						false
+					);
+					resetCategories();
+					return;
+				case AvatarEditorAction.ACTION_RESET:
+					loadAvatarInEditor(lastFigure, lastGender);
+					resetCategories();
+					return;
+				case AvatarEditorAction.ACTION_RANDOMIZE:
+					const figure = generateRandomFigure(
+						figureData,
+						figureData.gender,
+						GetClubMemberLevel(),
+						figureSetIds,
+						[FigureData.FACE]
+					);
 
-                if(parts.length < 2) return;
+					loadAvatarInEditor(figure, figureData.gender, false);
+					resetCategories();
+					return;
+				case AvatarEditorAction.ACTION_SAVE:
+					!genderFootballGate
+						? SendMessageComposer(
+								new UserFigureComposer(
+									figureData.gender,
+									figureData.getFigureString()
+								)
+						  )
+						: SendMessageComposer(
+								new SetClothingChangeDataMessageComposer(
+									objectFootballGate,
+									genderFootballGate,
+									figureData.getFigureString()
+								)
+						  );
+					SetLocalStorage(
+						`nitro.look.footballgate.${genderFootballGate}`,
+						figureData.getFigureString()
+					);
+					onClose();
+					return;
+			}
+		},
+		[
+			loadAvatarInEditor,
+			figureData,
+			resetCategories,
+			lastFigure,
+			lastGender,
+			figureSetIds,
+			genderFootballGate,
+			objectFootballGate,
+		]
+	);
 
-                switch(parts[1])
-                {
-                    case 'show':
-                        setIsVisible(true);
-                        return;
-                    case 'hide':
-                        setIsVisible(false);
-                        return;
-                    case 'toggle':
-                        setIsVisible(prevValue => !prevValue);
-                        return;
-                }
-            },
-            eventUrlPrefix: 'avatar-editor/'
-        };
+	const setGender = useCallback(
+		(gender: string) => {
+			gender = AvatarEditorUtilities.getGender(gender);
 
-        AddEventLinkTracker(linkTracker);
+			setFigureData(figures.get(gender));
+		},
+		[figures]
+	);
 
-        return () => RemoveLinkEventTracker(linkTracker);
-    }, []);
+	useEffect(() => {
+		const linkTracker: ILinkEventTracker = {
+			linkReceived: (url: string) => {
+				const parts = url.split("/");
 
-    useEffect(() =>
-    {
-        setSavedFigures(new Array(maxWardrobeSlots));
-    }, [ maxWardrobeSlots ]);
+				setGenderFootballGate(parts[2] ? parts[2] : null);
+				setObjectFootballGate(parts[3] ? Number(parts[3]) : null);
 
-    useEffect(() =>
-    {
-        SendMessageComposer(new GetWardrobeMessageComposer());
-    }, []);
+				if (parts.length < 2) return;
 
-    useEffect(() =>
-    {
-        if(!categories) return;
+				switch (parts[1]) {
+					case "show":
+						setIsVisible(true);
+						return;
+					case "hide":
+						setIsVisible(false);
+						return;
+					case "toggle":
+						setIsVisible((prevValue) => !prevValue);
+						return;
+				}
+			},
+			eventUrlPrefix: "avatar-editor/",
+		};
 
-        selectCategory(!genderFootballGate ? AvatarEditorFigureCategory.GENERIC : AvatarEditorFigureCategory.TORSO);
-    }, [ categories, genderFootballGate, selectCategory ]);
+		AddEventLinkTracker(linkTracker);
 
-    useEffect(() =>
-    {
-        if(!figureData) return;
+		return () => RemoveLinkEventTracker(linkTracker);
+	}, []);
 
-        AvatarEditorUtilities.CURRENT_FIGURE = figureData;
+	useEffect(() => {
+		setSavedFigures(new Array(maxWardrobeSlots));
+	}, [maxWardrobeSlots]);
 
-        resetCategories();
+	useEffect(() => {
+		SendMessageComposer(new GetWardrobeMessageComposer());
+	}, []);
 
-        return () => AvatarEditorUtilities.CURRENT_FIGURE = null;
-    }, [ figureData, resetCategories ]);
+	useEffect(() => {
+		if (!categories) return;
 
-    useEffect(() =>
-    {
-        AvatarEditorUtilities.FIGURE_SET_IDS = figureSetIds;
-        AvatarEditorUtilities.BOUND_FURNITURE_NAMES = boundFurnitureNames;
+		selectCategory(
+			!genderFootballGate
+				? AvatarEditorFigureCategory.GENERIC
+				: AvatarEditorFigureCategory.TORSO
+		);
+	}, [categories, genderFootballGate, selectCategory]);
 
-        resetCategories();
+	useEffect(() => {
+		if (!figureData) return;
 
-        return () =>
-        {
-            AvatarEditorUtilities.FIGURE_SET_IDS = null;
-            AvatarEditorUtilities.BOUND_FURNITURE_NAMES = null;
-        }
-    }, [ figureSetIds, boundFurnitureNames, resetCategories ]);
+		AvatarEditorUtilities.CURRENT_FIGURE = figureData;
 
-    useEffect(() =>
-    {
-        if(!isVisible) return;
+		resetCategories();
 
-        if(!figures)
-        {
-            setupFigures();
+		return () => (AvatarEditorUtilities.CURRENT_FIGURE = null);
+	}, [figureData, resetCategories]);
 
-            setIsInitalized(true);
+	useEffect(() => {
+		AvatarEditorUtilities.FIGURE_SET_IDS = figureSetIds;
+		AvatarEditorUtilities.BOUND_FURNITURE_NAMES = boundFurnitureNames;
 
-            return;
-        }
-    }, [ isVisible, figures, setupFigures ]);
+		resetCategories();
 
-    useEffect(() =>
-    {
-        if(!isVisible || !isInitalized || !needsReset) return;
+		return () => {
+			AvatarEditorUtilities.FIGURE_SET_IDS = null;
+			AvatarEditorUtilities.BOUND_FURNITURE_NAMES = null;
+		};
+	}, [figureSetIds, boundFurnitureNames, resetCategories]);
 
-        if (!genderFootballGate) loadAvatarInEditor(GetSessionDataManager().figure, GetSessionDataManager().gender);
-        if (genderFootballGate) loadAvatarInEditor(genderFootballGate === FigureData.MALE ? DEFAULT_MALE_FOOTBALL_GATE : DEFAULT_FEMALE_FOOTBALL_GATE, genderFootballGate);
-        setNeedsReset(false);
-    }, [ isVisible, isInitalized, needsReset, loadAvatarInEditor, genderFootballGate, DEFAULT_MALE_FOOTBALL_GATE, DEFAULT_FEMALE_FOOTBALL_GATE ]);
+	useEffect(() => {
+		if (!isVisible) return;
 
-    useEffect(() => // This is so when you have the look editor open and you change the mode to Boy or Girl
-    {
-        if(!isVisible) return;
+		if (!figures) {
+			setupFigures();
 
-        return () =>
-        {
-            setupFigures();
-            setIsWardrobeVisible(false);
-            setNeedsReset(true);
-        }
-    }, [ isVisible, genderFootballGate, setupFigures ]);
+			setIsInitalized(true);
 
-    useEffect(() =>
-    {
-        if(isVisible) return;
+			return;
+		}
+	}, [isVisible, figures, setupFigures]);
 
-        return () =>
-        {
-            setNeedsReset(true);
-        }
-    }, [ isVisible ]);
+	useEffect(() => {
+		if (!isVisible || !isInitalized || !needsReset) return;
 
-    if(!isVisible || !figureData) return null;
+		if (!genderFootballGate)
+			loadAvatarInEditor(
+				GetSessionDataManager().figure,
+				GetSessionDataManager().gender
+			);
+		if (genderFootballGate)
+			loadAvatarInEditor(
+				genderFootballGate === FigureData.MALE
+					? DEFAULT_MALE_FOOTBALL_GATE
+					: DEFAULT_FEMALE_FOOTBALL_GATE,
+				genderFootballGate
+			);
+		setNeedsReset(false);
+	}, [
+		isVisible,
+		isInitalized,
+		needsReset,
+		loadAvatarInEditor,
+		genderFootballGate,
+		DEFAULT_MALE_FOOTBALL_GATE,
+		DEFAULT_FEMALE_FOOTBALL_GATE,
+	]);
 
-    const avatarEditorClasses = `nitro-avatar-editor no-resize ${ isWardrobeVisible ? 'expanded' : '' }`;
+	useEffect(() => {
+		if (!isVisible) return;
 
-    return (
-        <NitroCardView uniqueKey="avatar-editor" className={ avatarEditorClasses }>
-            <NitroCardHeaderView headerText={ !genderFootballGate ? LocalizeText('avatareditor.title') : LocalizeText('widget.furni.clothingchange.editor.title') } onCloseClick={ onClose } />
-            <NitroCardTabsView className="avatar-editor-tabs">
-                { categories && (categories.size > 0) && Array.from(categories.keys()).map(category =>
-                {
-                    const isActive = (activeCategory && (activeCategory.name === category));
+		return () => {
+			setupFigures();
+			setIsWardrobeVisible(false);
+			setNeedsReset(true);
+		};
+	}, [isVisible, genderFootballGate, setupFigures]);
 
-                    return (
-                        <NitroCardTabsItemView key={ category } isActive={ isActive } onClick={ event => selectCategory(category) }>
-                            <div className={ `tab ${ category }` }></div>
-                        </NitroCardTabsItemView>
-                    );
-                }) }
-                { (!genderFootballGate) &&
-                    <NitroCardTabsItemView onClick={ event => setIsWardrobeVisible(!isWardrobeVisible) }>
-                        <div className="tab-wardrobe"></div>
-                    </NitroCardTabsItemView>
-                }
-            </NitroCardTabsView>
-            <NitroCardContentView>
-                <Grid>
-                    <Column size={ isWardrobeVisible ? 6 : 8 } overflow="hidden">
-                        { (activeCategory) &&
-                            <AvatarEditorModelView model={ activeCategory } gender={ figureData.gender } setGender={ setGender } /> 
-                        }
-                    </Column>
-                    <Column size={ isWardrobeVisible ? 6 : 4 } overflow="hidden">
-                        <Flex gap={ 2 } className="w-100 h-100">
-                            <Flex column={ true } className="w-100">
-                                <AvatarEditorFigurePreviewView figureData={ figureData } />
-                                <Column grow gap={ 1 }>
-                                    { (!genderFootballGate) &&
-                                        <ButtonGroup className="action-buttons w-100">
-                                            <Button variant="secondary" onClick={ event => processAction(AvatarEditorAction.ACTION_RESET) }>
-                                                <FaUndo className="fa-icon" />
-                                            </Button>
-                                            <Button variant="secondary" onClick={ event => processAction(AvatarEditorAction.ACTION_CLEAR) }>
-                                                <FaTrash className="fa-icon" />
-                                            </Button>
-                                            <Button variant="secondary" onClick={ event => processAction(AvatarEditorAction.ACTION_RANDOMIZE) }>
-                                                <FaDice className="fa-icon" />
-                                            </Button>
-                                        </ButtonGroup>
-                                    }
-                                    <Button className="w-10" variant="success" onClick={ event => processAction(AvatarEditorAction.ACTION_SAVE) }>
-                                        { LocalizeText('avatareditor.save') }
-                                    </Button>
-                                </Column>
-                            </Flex>
-                            { isWardrobeVisible &&
-                                <Column overflow="hidden" className="w-100">
-                                    <AvatarEditorWardrobeView figureData={ figureData } savedFigures={ savedFigures } setSavedFigures={ setSavedFigures } loadAvatarInEditor={ loadAvatarInEditor } />
-                                </Column>
-                            }
-                        </Flex>
-                    </Column>
-                </Grid>
-            </NitroCardContentView>
-        </NitroCardView>
-    );
-}
+	useEffect(() => {
+		if (isVisible) return;
+
+		return () => {
+			setNeedsReset(true);
+		};
+	}, [isVisible]);
+
+	if (!isVisible || !figureData) return null;
+
+	return (
+		<StarboCard
+			uniqueKey="avatar-editor"
+			width={isWardrobeVisible ? 660 : 496}
+			height={520}
+			onClose={onClose}
+			resize="disabled"
+		>
+			<Header>
+				{!genderFootballGate
+					? LocalizeText("avatareditor.title")
+					: LocalizeText("widget.furni.clothingchange.editor.title")}
+			</Header>
+
+			<Body columns>
+				<Column side="left" width={490}>
+					<p className="username">
+						{GetSessionDataManager().userName}
+					</p>
+					<Subheader width={487} height={109} color="rgb(14, 63, 82)">
+						<Tabs>
+							{categories &&
+								categories.size > 0 &&
+								Array.from(categories.keys()).map(
+									(category) => {
+										const isActive =
+											activeCategory &&
+											activeCategory.name === category;
+
+										return (
+											<Tab
+												key={category}
+												isActive={isActive}
+												onClick={() =>
+													selectCategory(category)
+												}
+											>
+												<div
+													className={`icon ${category}`}
+												></div>
+											</Tab>
+										);
+									}
+								)}
+						</Tabs>
+
+						{!genderFootballGate && (
+							<Button
+								variant="primary"
+								shadow
+								width={49}
+								onClick={() =>
+									setIsWardrobeVisible(!isWardrobeVisible)
+								}
+							>
+								<div className="wardrobe"></div>
+							</Button>
+						)}
+					</Subheader>
+					<Content>
+						<div className="left">
+							{activeCategory && (
+								<AvatarEditorModelView
+									model={activeCategory}
+									gender={figureData.gender}
+									setGender={setGender}
+								/>
+							)}
+						</div>
+						<div className="right">
+							<AvatarEditorFigurePreviewView
+								figureData={figureData}
+							/>
+							<Button
+								variant="primary"
+								width={96}
+								height={"medium"}
+								outline
+								shadow
+								onClick={() =>
+									processAction(
+										AvatarEditorAction.ACTION_SAVE
+									)
+								}
+							>
+								{LocalizeText("avatareditor.save")}
+							</Button>
+						</div>
+					</Content>
+				</Column>
+				{isWardrobeVisible && (
+					<Column side="right">
+						<Content>
+							<AvatarEditorWardrobeView
+								figureData={figureData}
+								savedFigures={savedFigures}
+								setSavedFigures={setSavedFigures}
+								loadAvatarInEditor={loadAvatarInEditor}
+							/>
+						</Content>
+					</Column>
+				)}
+			</Body>
+		</StarboCard>
+	);
+};

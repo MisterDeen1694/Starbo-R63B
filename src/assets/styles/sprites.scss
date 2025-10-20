@@ -1,0 +1,12 @@
+$cell-size: 40px;
+
+// mixin: sprite($row, $col, $sheet)
+@mixin sprite($row, $col, $sheet) {
+	$x: ($col - 1) * -$cell-size;
+	$y: ($row - 1) * -$cell-size;
+
+	display: inline-block;
+	background-repeat: no-repeat;
+	background-position: $x $y;
+	background-image: url("@/assets/sprites/#{$sheet}.png");
+}

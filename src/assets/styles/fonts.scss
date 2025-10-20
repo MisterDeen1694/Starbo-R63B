@@ -1,4 +1,76 @@
 @font-face {
-    font-family: Ubuntu;
-    src: url('@/assets/webfonts/Ubuntu-C.ttf');
+	font-family: Ubuntu;
+	src: url("@/assets/webfonts/Ubuntu-C.ttf");
+}
+
+// fonts.scss
+
+// @font-face declaraties blijven hetzelfde als eerder
+@font-face {
+	font-family: "Ubuntu";
+	src: url("@/assets/webfonts/Ubuntu.ttf") format("truetype");
+	font-weight: 400;
+	font-style: normal;
+}
+@font-face {
+	font-family: "Ubuntu";
+	src: url("@/assets/webfonts/Ubuntu-m.ttf") format("truetype");
+	font-weight: 500;
+	font-style: normal;
+}
+@font-face {
+	font-family: "Ubuntu";
+	src: url("@/assets/webfonts/Ubuntu-b.ttf") format("truetype");
+	font-weight: 700;
+	font-style: normal;
+}
+@font-face {
+	font-family: "Ubuntu";
+	src: url("@/assets/webfonts/Ubuntu-C.ttf") format("truetype");
+	font-weight: 400;
+	font-style: normal;
+	font-stretch: condensed;
+}
+@font-face {
+	font-family: "Ubuntu";
+	src: url("@/assets/webfonts/Ubuntu-i.ttf") format("truetype");
+	font-weight: 400;
+	font-style: italic;
+}
+@font-face {
+	font-family: "Ubuntu";
+	src: url("@/assets/webfonts/Ubuntu-ib.ttf") format("truetype");
+	font-weight: 700;
+	font-style: italic;
+}
+
+// Mixin met string-argumenten
+@mixin ubuntu($weight: normal, $style: normal, $stretch: normal) {
+	font-family: "Ubuntu", sans-serif;
+
+	// Gewicht omzetten van string naar nummer
+	@if $weight == normal {
+		font-weight: 400;
+		letter-spacing: 0.5px;
+	} @else if $weight == medium {
+		font-weight: 500;
+	} @else if $weight == bold {
+		font-weight: 700;
+	} @else {
+		font-weight: $weight; // fallback als nummer gegeven wordt
+	}
+
+	// Style omzetten
+	@if $style == normal or $style == italic {
+		font-style: $style;
+	} @else {
+		font-style: normal;
+	}
+
+	// Stretch
+	@if $stretch == condensed {
+		font-stretch: condensed;
+	} @else {
+		font-stretch: normal;
+	}
 }

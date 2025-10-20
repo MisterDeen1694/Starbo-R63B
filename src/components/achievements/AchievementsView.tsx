@@ -1,72 +1,161 @@
-import { ILinkEventTracker } from '@nitrots/nitro-renderer';
-import { FC, useEffect, useState } from 'react';
-import { AchievementUtilities, AddEventLinkTracker, LocalizeText, RemoveLinkEventTracker } from '../../api';
-import { Base, Column, LayoutImage, LayoutProgressBar, NitroCardContentView, NitroCardHeaderView, NitroCardSubHeaderView, NitroCardView, Text } from '../../common';
-import { useAchievements } from '../../hooks';
-import { AchievementCategoryView } from './views/AchievementCategoryView';
-import { AchievementsCategoryListView } from './views/category-list/AchievementsCategoryListView';
+import { ILinkEventTracker } from "@nitrots/nitro-renderer";
+import { FC, useEffect, useState } from "react";
+import {
+	AchievementUtilities,
+	AddEventLinkTracker,
+	LocalizeText,
+	RemoveLinkEventTracker,
+} from "../../api";
+import { ProgressBar, StarboCard } from "../../common";
+const { Header, Body, Subheader, Content } = StarboCard;
+import { useAchievements } from "../../hooks";
+import { AchievementCategoryView } from "./views/AchievementCategoryView";
+import { AchievementsCategoryListView } from "./views/category-list/AchievementsCategoryListView";
 
-export const AchievementsView: FC<{}> = props =>
-{
-    const [ isVisible, setIsVisible ] = useState(false);
-    const { achievementCategories = [], selectedCategoryCode = null, setSelectedCategoryCode = null, achievementScore = 0, getProgress = 0, getMaxProgress = 0, selectedCategory = null } = useAchievements();
+export const AchievementsView: FC<{}> = () => {
+	const [isVisible, setIsVisible] = useState(false);
+	const {
+		achievementCategories = [],
+		selectedCategoryCode = null,
+		setSelectedCategoryCode = null,
+		achievementScore = 0,
+		getProgress = 0,
+		getMaxProgress = 0,
+		selectedCategory = null,
+	} = useAchievements();
 
-    useEffect(() =>
-    {
-        const linkTracker: ILinkEventTracker = {
-            linkReceived: (url: string) =>
-            {
-                const parts = url.split('/');
-        
-                if(parts.length < 2) return;
-        
-                switch(parts[1])
-                {
-                    case 'show':
-                        setIsVisible(true);
-                        return;
-                    case 'hide':
-                        setIsVisible(false);
-                        return;
-                    case 'toggle':
-                        setIsVisible(prevValue => !prevValue);
-                        return;
-                }
-            },
-            eventUrlPrefix: 'achievements/'
-        };
+	useEffect(() => {
+		const linkTracker: ILinkEventTracker = {
+			linkReceived: (url: string) => {
+				const parts = url.split("/");
 
-        AddEventLinkTracker(linkTracker);
+				if (parts.length < 2) return;
 
-        return () => RemoveLinkEventTracker(linkTracker);
-    }, []);
+				switch (parts[1]) {
+					case "show":
+						setIsVisible(true);
+						return;
+					case "hide":
+						setIsVisible(false);
+						return;
+					case "toggle":
+						setIsVisible((prevValue) => !prevValue);
+						return;
+				}
+			},
+			eventUrlPrefix: "achievements/",
+		};
 
-    if(!isVisible) return null;
+		AddEventLinkTracker(linkTracker);
 
-    return (
-        <NitroCardView uniqueKey="achievements" className="nitro-achievements" theme="primary-slim">
-            <NitroCardHeaderView headerText={ LocalizeText('inventory.achievements') } onCloseClick={ event => setIsVisible(false) } />
-            { selectedCategory &&
-                <NitroCardSubHeaderView position="relative" className="justify-content-center align-items-center cursor-pointer" gap={ 3 }>
-                    <Base onClick={ event => setSelectedCategoryCode(null) } className="nitro-achievements-back-arrow" />
-                    <Column grow gap={ 0 }>
-                        <Text fontSize={ 4 } fontWeight="bold" className="text-small">{ LocalizeText(`quests.${ selectedCategory.code }.name`) }</Text>
-                        <Text>{ LocalizeText('achievements.details.categoryprogress', [ 'progress', 'limit' ], [ selectedCategory.getProgress().toString(), selectedCategory.getMaxProgress().toString() ]) }</Text>
-                    </Column>
-                    <LayoutImage imageUrl={ AchievementUtilities.getAchievementCategoryImageUrl(selectedCategory, null,true) } />
-                </NitroCardSubHeaderView> }
-            <NitroCardContentView gap={ 1 }>
-                { !selectedCategory &&
-                    <>
-                        <AchievementsCategoryListView categories={ achievementCategories } selectedCategoryCode={ selectedCategoryCode } setSelectedCategoryCode={ setSelectedCategoryCode } />
-                        <Column grow justifyContent="end" gap={ 1 }>
-                            <Text small center>{ LocalizeText('achievements.categories.score', [ 'score' ], [ achievementScore.toString() ]) }</Text>
-                            <LayoutProgressBar text={ LocalizeText('achievements.categories.totalprogress', [ 'progress', 'limit' ], [ getProgress.toString(), getMaxProgress.toString() ]) } progress={ getProgress } maxProgress={ getMaxProgress } />
-                        </Column>
-                    </> }
-                { selectedCategory &&
-                    <AchievementCategoryView category={ selectedCategory } /> }
-            </NitroCardContentView>
-        </NitroCardView>
-    );
+		return () => RemoveLinkEventTracker(linkTracker);
+	}, []);
+
+	const cardHeight = () => {
+		if (!selectedCategory) {
+			return 86 + 110 * Math.ceil(achievementCategories.length / 3);
+		}
+
+		if (selectedCategory.achievements.length <= 20) {
+			return (
+				262 + 60 * Math.ceil(selectedCategory.achievements.length / 6)
+			);
+		}
+		return 501;
+	};
+
+	if (!isVisible) return null;
+
+	return (
+		<StarboCard
+			onClose={() => setIsVisible(false)}
+			width={389}
+			height={cardHeight()}
+			uniqueKey="achievements"
+			resize="disabled"
+			variant="primary"
+		>
+			<Header>{LocalizeText("inventory.achievements")}</Header>
+			<Body>
+				{!selectedCategory && (
+					<Content>
+						<AchievementsCategoryListView
+							categories={achievementCategories}
+							setSelectedCategoryCode={setSelectedCategoryCode}
+						/>
+						<div className="total-progress">
+							<ProgressBar
+								label={LocalizeText(
+									"achievements.categories.totalprogress",
+									["progress", "limit"],
+									[
+										getProgress.toString(),
+										getMaxProgress.toString(),
+									]
+								)}
+								progress={getProgress}
+								maxProgress={getMaxProgress}
+							/>
+							<p>
+								{LocalizeText(
+									"achievements.categories.score",
+									["score"],
+									[achievementScore.toString()]
+								)}
+							</p>
+						</div>
+					</Content>
+				)}
+				{selectedCategory && (
+					<>
+						<Subheader
+							width={"full"}
+							color="rgb(136, 153, 162)"
+							height={75}
+						>
+							<button
+								className="back"
+								onClick={() => setSelectedCategoryCode(null)}
+							/>
+							<div className="infomation">
+								<h3 className="title">
+									{LocalizeText(
+										`quests.${selectedCategory.code}.name`
+									)}
+								</h3>
+								<p className="progress">
+									{LocalizeText(
+										"achievements.details.categoryprogress",
+										["progress", "limit"],
+										[
+											selectedCategory
+												.getProgress()
+												.toString(),
+											selectedCategory
+												.getMaxProgress()
+												.toString(),
+										]
+									)}
+								</p>
+							</div>
+							<img
+								draggable="false"
+								src={AchievementUtilities.getAchievementCategoryImageUrl(
+									selectedCategory,
+									null,
+									true
+								)}
+								className="icon"
+							/>
+						</Subheader>
+						<Content>
+							<AchievementCategoryView
+								category={selectedCategory}
+							/>
+						</Content>
+					</>
+				)}
+			</Body>
+		</StarboCard>
+	);
 };

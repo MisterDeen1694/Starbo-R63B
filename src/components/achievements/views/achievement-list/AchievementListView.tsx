@@ -1,20 +1,30 @@
-import { AchievementData } from '@nitrots/nitro-renderer';
-import { FC } from 'react';
-import { AutoGrid } from '../../../../common';
-import { AchievementListItemView } from './AchievementListItemView';
+import { AchievementData } from "@nitrots/nitro-renderer";
+import { FC } from "react";
+import { AchievementListItemView } from "./AchievementListItemView";
+import clsx from "clsx";
 
-interface AchievementListViewProps
-{
-    achievements: AchievementData[];
+interface AchievementListViewProps {
+	achievements: AchievementData[];
 }
 
-export const AchievementListView: FC<AchievementListViewProps> = props =>
-{
-    const { achievements = null } = props;
+export const AchievementListView: FC<AchievementListViewProps> = (props) => {
+	const { achievements = null } = props;
 
-    return (
-        <AutoGrid columnCount={ 6 } columnMinWidth={ 50 } columnMinHeight={ 50 }>
-            { achievements && (achievements.length > 0) && achievements.map((achievement, index) => <AchievementListItemView key={ index } achievement={ achievement } />) }
-        </AutoGrid>
-    );
-}
+	return (
+		<div
+			className={clsx(
+				"achievements",
+				achievements.length > 20 && "reduce-columns"
+			)}
+		>
+			{achievements &&
+				achievements.length > 0 &&
+				achievements.map((achievement, index) => (
+					<AchievementListItemView
+						key={index}
+						achievement={achievement}
+					/>
+				))}
+		</div>
+	);
+};

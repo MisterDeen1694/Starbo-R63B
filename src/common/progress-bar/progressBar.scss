@@ -1,0 +1,36 @@
+.progress-bar {
+	& .track {
+		height: 21px;
+		overflow: hidden;
+		background: rgb(90, 83, 79);
+		border: 2px solid rgb(225, 225, 225);
+		border-radius: 5px;
+		outline: 1px solid rgb(0, 0, 0);
+		align-self: center;
+		position: relative;
+
+		& .indicator {
+			height: 100%;
+			z-index: 1;
+			transition: all 1s;
+			background: repeating-linear-gradient(
+				rgb(0, 180, 193),
+				rgb(0, 180, 193) 50%,
+				rgb(0, 163, 174) 0,
+				rgb(0, 163, 174)
+			);
+			border-left: 1px solid rgb(0, 163, 174);
+			position: absolute;
+		}
+
+		& .label {
+			text-shadow: 0px 4px 4px rgba($black, 0.25);
+			z-index: 2;
+			@include ubuntu(bold);
+			position: absolute;
+			display: grid;
+			justify-self: center;
+			top: -1px;
+		}
+	}
+}

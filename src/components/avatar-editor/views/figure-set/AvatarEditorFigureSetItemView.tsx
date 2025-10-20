@@ -1,37 +1,40 @@
-import { FC, useEffect, useState } from 'react';
-import { AvatarEditorGridPartItem, GetConfiguration } from '../../../../api';
-import { LayoutCurrencyIcon, LayoutGridItem, LayoutGridItemProps } from '../../../../common';
-import { AvatarEditorIcon } from '../AvatarEditorIcon';
-
-export interface AvatarEditorFigureSetItemViewProps extends LayoutGridItemProps
-{
-    partItem: AvatarEditorGridPartItem;
+import { FC, useEffect, useState } from "react";
+import { AvatarEditorGridPartItem, GetConfiguration } from "../../../../api";
+import { LayoutGridItemProps } from "../../../../common";
+import clsx from "clsx";
+export interface AvatarEditorFigureSetItemViewProps
+	extends LayoutGridItemProps {
+	partItem: AvatarEditorGridPartItem;
+	onClick: () => void;
 }
 
-export const AvatarEditorFigureSetItemView: FC<AvatarEditorFigureSetItemViewProps> = props =>
-{
-    const { partItem = null, children = null, ...rest } = props;
-    const [ updateId, setUpdateId ] = useState(-1);
+export const AvatarEditorFigureSetItemView: FC<
+	AvatarEditorFigureSetItemViewProps
+> = (props) => {
+	const { partItem = null, children = null, onClick, ...rest } = props;
+	const [updateId, setUpdateId] = useState(-1);
+	const hcDisabled = GetConfiguration<boolean>("hc.disabled", false);
 
-    const hcDisabled = GetConfiguration<boolean>('hc.disabled', false);
+	useEffect(() => {
+		const rerender = () => setUpdateId((prevValue) => prevValue + 1);
 
-    useEffect(() =>
-    {
-        const rerender = () => setUpdateId(prevValue => (prevValue + 1));
+		partItem.notify = rerender;
 
-        partItem.notify = rerender;
+		return () => (partItem.notify = null);
+	}, [partItem]);
 
-        return () => partItem.notify = null;
-    }, [ partItem ]);
-
-    return (
-        <div className="avatar-container">
-            <LayoutGridItem className={ `avatar-parts ${ partItem.isSelected ? 'part-selected' : '' }` } itemImage={ (partItem.isClear ? undefined : partItem.imageUrl) } { ...rest }>
-                { !hcDisabled && partItem.isHC && <i className="icon hc-icon position-absolute" /> }
-                { partItem.isClear && <AvatarEditorIcon icon="clear" /> }
-                { partItem.isSellable && <AvatarEditorIcon icon="sellable" position="absolute" className="end-1 bottom-1" /> }
-                { children }
-            </LayoutGridItem>
-        </div>
-    );
-}
+	return (
+		<div
+			className={clsx(
+				"item",
+				partItem.isSelected && "selected",
+				!hcDisabled && partItem.isHC && "starbo-club"
+			)}
+			id={clsx(partItem.id)}
+			onClick={onClick}
+		>
+			{partItem.isClear && <div className="remove"></div>}
+			{!partItem.isClear && <img src={partItem.imageUrl} />}
+		</div>
+	);
+};

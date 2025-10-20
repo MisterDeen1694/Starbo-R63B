@@ -1,0 +1,67 @@
+.starbo-button {
+	box-sizing: content-box;
+	cursor: pointer;
+	display: flex;
+	&.primary {
+		border-radius: 2px;
+		outline: 1px solid black;
+		margin: 1px 2px 2px 1px;
+		@include ui-gradient(rgb(243, 243, 243), rgb(217, 217, 217));
+		border: 1px solid rgb(217, 217, 217);
+		padding: 0;
+		@include ubuntu(bold);
+		text-align: center;
+		justify-content: center;
+
+		&:not(:disabled):hover {
+			@include ui-gradient(rgb(255, 255, 255), rgb(243, 243, 243));
+			border: 1px solid rgb(255, 255, 255);
+		}
+		&:not(:disabled):active {
+			@include ui-gradient(rgb(225, 225, 225), rgb(163, 163, 163));
+			border: 1px solid rgb(163, 163, 163);
+		}
+		&:disabled {
+			background: rgba(203, 203, 203, 173);
+			--disabled: rgba(67, 67, 67, 173);
+		}
+	}
+
+	&.w-full {
+		width: 100%;
+	}
+
+	&.w-auto {
+		width: fit-content;
+		padding-inline: 9px;
+	}
+
+	&.h-small {
+		height: 15px;
+	}
+
+	&.h-medium {
+		height: 23px;
+	}
+
+	&.h-large {
+		height: 31px;
+	}
+
+	&.shadow {
+		box-shadow: 1px 1px 0px 1px var(--disabled, black);
+	}
+
+	&.outline {
+		box-shadow: 0px 0px 0px 2px var(--disabled, black);
+
+		&.shadow {
+			box-shadow: 0px 0px 0px 2px var(--disabled, black),
+				0px 1px 0px 2px var(--disabled, black);
+		}
+	}
+
+	& > * {
+		margin: auto;
+	}
+}

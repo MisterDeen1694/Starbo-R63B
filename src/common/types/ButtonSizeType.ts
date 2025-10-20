@@ -1,1 +1,2 @@
-export type ButtonSizeType = 'lg' | 'sm';
+/** @deprecated */
+export type ButtonSizeType = "lg" | "sm";

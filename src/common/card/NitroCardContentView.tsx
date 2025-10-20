@@ -1,18 +1,16 @@
-import { FC, useMemo } from 'react';
-import { Column, ColumnProps } from '..';
+import { FC, useMemo } from "react";
+import { Column, ColumnProps } from "..";
+/** @deprecated use StarboCard element instead */
+export const NitroCardContentView: FC<ColumnProps> = (props) => {
+	const { overflow = "auto", classNames = [], ...rest } = props;
 
-export const NitroCardContentView: FC<ColumnProps> = props =>
-{
-    const { overflow = 'auto', classNames = [], ...rest } = props;
+	const getClassNames = useMemo(() => {
+		const newClassNames: string[] = ["container-fluid", "content-area"];
 
-    const getClassNames = useMemo(() =>
-    {
-        const newClassNames: string[] = [ 'container-fluid', 'content-area' ];
+		if (classNames.length) newClassNames.push(...classNames);
 
-        if(classNames.length) newClassNames.push(...classNames);
+		return newClassNames;
+	}, [classNames]);
 
-        return newClassNames;
-    }, [ classNames ]);
-
-    return <Column classNames={ getClassNames } overflow={ overflow } { ...rest } />;
-}
+	return <Column classNames={getClassNames} overflow={overflow} {...rest} />;
+};

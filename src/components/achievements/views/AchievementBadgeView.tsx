@@ -1,19 +1,28 @@
-import { AchievementData } from '@nitrots/nitro-renderer';
-import { FC } from 'react';
-import { AchievementUtilities } from '../../../api';
-import { BaseProps, LayoutBadgeImageView } from '../../../common';
-
-interface AchievementBadgeViewProps extends BaseProps<HTMLDivElement>
-{
-    achievement: AchievementData;
-    scale?: number;
+import { AchievementData } from "@nitrots/nitro-renderer";
+import { FC } from "react";
+import { AchievementUtilities, GetConfiguration } from "../../../api";
+import clsx from "clsx";
+interface AchievementBadgeViewProps {
+	achievement: AchievementData;
 }
 
-export const AchievementBadgeView: FC<AchievementBadgeViewProps> = props =>
-{
-    const { achievement = null, scale = 1, ...rest } = props;
+export const AchievementBadgeView: FC<AchievementBadgeViewProps> = (props) => {
+	const { achievement = null } = props;
 
-    if(!achievement) return null;
+	if (!achievement) return null;
 
-    return <LayoutBadgeImageView badgeCode={ AchievementUtilities.getAchievementBadgeCode(achievement) } isGrayscale={ !AchievementUtilities.getAchievementHasStarted(achievement) } scale={ scale } { ...rest } />;
-}
+	return (
+		<img
+			draggable="false"
+			className={clsx(
+				"image",
+				!AchievementUtilities.getAchievementHasStarted(achievement) &&
+					"incomplete"
+			)}
+			src={GetConfiguration<string>("badge.asset.url").replace(
+				"%badgename%",
+				achievement.badgeId.toString()
+			)}
+		/>
+	);
+};

@@ -1,53 +1,141 @@
 ::-webkit-scrollbar {
-    width: 0.5rem;
+	width: 17px;
+	height: 17px;
 
-    &:horizontal {
-        height: 0.5rem;
-    }
+	&-button:single-button {
+		&:horizontal {
+			width: 16px;
+			height: 17px;
+			&:decrement {
+				@include sprite(1, 5, "scrollbar/starbo-scrollbar");
 
-    &:not(:horizontal) {
-        width: 0.5rem;
-    }
-}
+				&:hover {
+					@include sprite(1, 6, "scrollbar/starbo-scrollbar");
+				}
 
-::-webkit-scrollbar-track {
+				&:active {
+					@include sprite(1, 7, "scrollbar/starbo-scrollbar");
+				}
+			}
+			&:increment {
+				@include sprite(2, 5, "scrollbar/starbo-scrollbar");
 
-    &:horizontal {
-        border-bottom: 0.25rem solid rgba($black, .1);
-    }
+				&:hover {
+					@include sprite(2, 6, "scrollbar/starbo-scrollbar");
+				}
 
-    &:not(:horizontal) {
-        border-right: 0.25rem solid rgba($black, .1);
-    }
-}
+				&:active {
+					@include sprite(2, 7, "scrollbar/starbo-scrollbar");
+				}
+			}
+		}
 
-::-webkit-scrollbar-thumb {
+		&:vertical {
+			width: 17px;
+			height: 16px;
+			&:decrement {
+				@include sprite(1, 1, "scrollbar/starbo-scrollbar");
 
-    &:horizontal {
-        border-bottom: 0.25rem solid rgba($primary, .4);
+				&:hover {
+					@include sprite(1, 2, "scrollbar/starbo-scrollbar");
+				}
 
-        &:hover {
-            border-bottom: 0.25rem solid rgba($primary, .8);
-        }
-    
-        &:active {
-            border-bottom: 0.25rem solid $secondary;
-        }
-    }
+				&:active {
+					@include sprite(1, 3, "scrollbar/starbo-scrollbar");
+				}
+			}
+			&:increment {
+				@include sprite(2, 1, "scrollbar/starbo-scrollbar");
 
-    &:not(:horizontal) {
-        border-right: 0.25rem solid rgba($primary, .4);
+				&:hover {
+					@include sprite(2, 2, "scrollbar/starbo-scrollbar");
+				}
 
-        &:hover {
-            border-right: 0.25rem solid rgba($primary, .8);
-        }
+				&:active {
+					@include sprite(2, 3, "scrollbar/starbo-scrollbar");
+				}
+			}
+		}
+	}
 
-        &:active {
-            border-right: 0.25rem solid $secondary;
-        }
-    }
-}
+	&-track {
+		background-color: rgb(189 187 179);
+		&:horizontal {
+			height: 17px;
+			background-image: url("@/assets/sprites/scrollbar/horizontal-background.png");
+			background-repeat: repeat-x;
+		}
 
-::-webkit-scrollbar-corner {
-    background: rgba($black, .1);
+		&:vertical {
+			width: 17px;
+			background-image: url("@/assets/sprites/scrollbar/vertical-background.png");
+			background-repeat: repeat-y;
+		}
+	}
+
+	&-thumb {
+		&:vertical {
+			background: url("@/assets/sprites/scrollbar/v-top.png") no-repeat,
+				url("@/assets/sprites/scrollbar/v-bottom.png") no-repeat,
+				url("@/assets/sprites/scrollbar/v-center.png") repeat-y;
+
+			background-position: top, bottom, center;
+
+			border-radius: 0;
+			border: none;
+			&:hover {
+				background: url("@/assets/sprites/scrollbar/v-top-hover.png")
+						no-repeat,
+					url("@/assets/sprites/scrollbar/v-bottom-hover.png")
+						no-repeat,
+					url("@/assets/sprites/scrollbar/v-center-hover.png")
+						repeat-y;
+				background-position: top, bottom, center;
+			}
+
+			&:active {
+				background: url("@/assets/sprites/scrollbar/v-top-active.png")
+						no-repeat,
+					url("@/assets/sprites/scrollbar/v-bottom-active.png")
+						no-repeat,
+					url("@/assets/sprites/scrollbar/v-center-active.png")
+						repeat-y;
+				background-position: top, bottom, center;
+			}
+		}
+
+		&:horizontal {
+			background: url("@/assets/sprites/scrollbar/h-left.png") no-repeat,
+				url("@/assets/sprites/scrollbar/h-right.png") no-repeat,
+				url("@/assets/sprites/scrollbar/h-center.png") repeat-x;
+
+			background-position: left, right, center;
+
+			border-radius: 0;
+			border: none;
+
+			&:hover {
+				background: url("@/assets/sprites/scrollbar/h-left-hover.png")
+						no-repeat,
+					url("@/assets/sprites/scrollbar/h-right-hover.png")
+						no-repeat,
+					url("@/assets/sprites/scrollbar/h-center-hover.png")
+						repeat-x;
+				background-position: left, right, center;
+			}
+			&:active {
+				background: url("@/assets/sprites/scrollbar/h-left-active.png")
+						no-repeat,
+					url("@/assets/sprites/scrollbar/h-right-active.png")
+						no-repeat,
+					url("@/assets/sprites/scrollbar/h-center-active.png")
+						repeat-x;
+				background-position: left, right, center;
+			}
+		}
+	}
+
+	&-corner {
+		background-color: rgba(255, 255, 255, 0);
+	}
 }

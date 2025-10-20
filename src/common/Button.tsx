@@ -1,38 +1,81 @@
-import { FC, useMemo } from 'react';
-import { Flex, FlexProps } from './Flex';
-import { ButtonSizeType, ColorVariantType } from './types';
+import clsx from "clsx";
+import { CSSProperties, FC, ReactNode, useMemo } from "react";
 
-export interface ButtonProps extends FlexProps
-{
-    variant?: ColorVariantType;
-    size?: ButtonSizeType;
-    active?: boolean;
-    disabled?: boolean;
+export interface ButtonProps {
+	variant?: "primary";
+	width?: "full" | "auto" | number;
+	height?: "small" | "medium" | "large" | number;
+	outline?: boolean;
+	disabled?: boolean;
+	children?: ReactNode;
+	onClick?: (any: any | null) => void;
 }
 
-export const Button: FC<ButtonProps> = props =>
-{
-    const { variant = 'primary', size = 'sm', active = false, disabled = false, classNames = [], outline = false, tp = false, ...rest } = props;
+export const Button: FC<ButtonProps> = ({
+	children,
+	variant = "primary",
+	width = "auto",
+	height = "medium",
+	outline = false,
+	disabled = false,
+	...rest
+}) => {
+	const style: React.CSSProperties = {
+		width: typeof width === "number" && `${width}px`,
+		height: typeof height === "number" && `${width}px`,
+	};
+	return (
+		<button
+			{...rest}
+			disabled={disabled}
+			className={clsx(
+				"starbo-button",
+				variant,
+				typeof width !== "number" && "w-" + width,
+				typeof height !== "number" && "h-" + height,
+				outline && "outline"
+			)}
+			style={style}
+		>
+			{children}
+		</button>
+	);
+};
 
-    const getClassNames = useMemo(() =>
-    {
-        const newClassNames: string[] = [ 'btn' ];
+// export const Button: FC<ButtonProps & HTMLButtonElement> = (
+// 	children,
+// 	props
+// ) => {
+// 	const {
+// 		variant = "primary",
+// 		width = "auto",
+// 		height = "medium",
+// 		disabled = false,
+// 		outline = false,
+// 		...rest
+// 	} = props;
 
-        if(outline && variant) newClassNames.push('btn-outline-' + variant)
-        else if (variant) newClassNames.push('btn-' + variant);
-        
-        if (tp) newClassNames.push('btn-transparent');
+// 	/*
+// 	const getClassNames = useMemo(() => {
+// 		const newClassNames: string[] = ["starbo-button"];
 
-        if(size) newClassNames.push('btn-' + size);
+// 		if (variant) newClassNames.push(variant);
+// 		if (active) newClassNames.push("active");
+// 		if (disabled) newClassNames.push("disabled");
+// 		if (classNames.length) newClassNames.push(...classNames);
 
-        if(active) newClassNames.push('active');
+// 		return newClassNames;
+// 	}, [variant, active, disabled, classNames]);
 
-        if(disabled) newClassNames.push('disabled');
+// 	const getStyle = useMemo(() => {
+// 		let newStyle: CSSProperties = {};
+// 		if (width) newStyle["--button-width"] = width + "px";
+// 		if (height) newStyle["--button-height"] = height + "px";
 
-        if(classNames.length) newClassNames.push(...classNames);
+// 		if (Object.keys(style).length) newStyle = { ...newStyle, ...style };
 
-        return newClassNames;
-    }, [ variant, size, active, disabled, classNames, outline ]);
-
-    return <Flex center classNames={ getClassNames } { ...rest } />;
-}
+// 		return newStyle;
+// 	}, [height, width, style]);
+// */
+// 	return <button {...rest}>{children}</button>;
+// };

@@ -1,23 +1,24 @@
-import { FC, useMemo } from 'react';
-import { Flex, FlexProps } from '..';
+import { FC, useMemo } from "react";
+import { Flex, FlexProps } from "..";
 
-interface NitroCardSubHeaderProps extends FlexProps {
-    variant?: string;
-}
-export const NitroCardSubHeaderView: FC<NitroCardSubHeaderProps> = props =>
-{
-    const { justifyContent = 'center', classNames = [], variant = 'muted', ...rest } = props;
+interface NitroCardSubHeaderProps extends FlexProps {}
+/** @deprecated use StarboCard element instead */
+export const NitroCardSubHeaderView: FC<NitroCardSubHeaderProps> = (props) => {
+	const { justifyContent = "center", classNames = [], ...rest } = props;
 
-    const getClassNames = useMemo(() =>
-    {
-        const newClassNames: string[] = [ 'container-fluid', 'p-1' ];
+	const getClassNames = useMemo(() => {
+		const newClassNames: string[] = ["container-fluid"];
 
-        if(classNames.length) newClassNames.push(...classNames);
+		if (classNames.length) newClassNames.push(...classNames);
 
-        newClassNames.push('bg-' + variant);
+		return newClassNames;
+	}, [classNames]);
 
-        return newClassNames;
-    }, [ classNames, variant ]);
-
-    return <Flex justifyContent={ justifyContent } classNames={ getClassNames } { ...rest } />;
-}
+	return (
+		<Flex
+			justifyContent={justifyContent}
+			classNames={getClassNames}
+			{...rest}
+		/>
+	);
+};

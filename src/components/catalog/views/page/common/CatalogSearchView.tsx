@@ -1,96 +1,164 @@
-import { IFurnitureData } from '@nitrots/nitro-renderer';
-import { FC, useEffect, useState } from 'react';
-import { FaSearch, FaTimes } from 'react-icons/fa';
-import { CatalogPage, CatalogType, FilterCatalogNode, FurnitureOffer, GetOfferNodes, GetSessionDataManager, ICatalogNode, ICatalogPage, IPurchasableOffer, LocalizeText, PageLocalization, SearchResult } from '../../../../../api';
-import { Button, Flex } from '../../../../../common';
-import { useCatalog } from '../../../../../hooks';
+import { IFurnitureData } from "@nitrots/nitro-renderer";
+import { FC, useEffect, useState } from "react";
+import { FaSearch, FaTimes } from "react-icons/fa";
+import {
+	CatalogPage,
+	CatalogType,
+	FilterCatalogNode,
+	FurnitureOffer,
+	GetOfferNodes,
+	GetSessionDataManager,
+	ICatalogNode,
+	ICatalogPage,
+	IPurchasableOffer,
+	LocalizeText,
+	PageLocalization,
+	SearchResult,
+} from "../../../../../api";
+import { Button, Flex } from "../../../../../common";
+import { useCatalog } from "../../../../../hooks";
 
-export const CatalogSearchView: FC<{}> = props =>
-{
-    const [ searchValue, setSearchValue ] = useState('');
-    const { currentType = null, rootNode = null, offersToNodes = null, searchResult = null, setSearchResult = null, setCurrentPage = null } = useCatalog();
+export const CatalogSearchView: FC<{}> = (props) => {
+	const [searchValue, setSearchValue] = useState("");
+	const {
+		currentType = null,
+		rootNode = null,
+		offersToNodes = null,
+		searchResult = null,
+		setSearchResult = null,
+		setCurrentPage = null,
+	} = useCatalog();
 
-    useEffect(() =>
-    {
-        let search = searchValue?.toLocaleLowerCase().replace(' ', '');
+	useEffect(() => {
+		let search = searchValue?.toLocaleLowerCase().replace(" ", "");
 
-        if(!search || !search.length)
-        {
-            setSearchResult(null);
+		if (!search || !search.length) {
+			setSearchResult(null);
 
-            return;
-        }
+			return;
+		}
 
-        const timeout = setTimeout(() =>
-        {
-            const furnitureDatas = GetSessionDataManager().getAllFurnitureData({
-                loadFurnitureData: null
-            });
+		const timeout = setTimeout(() => {
+			const furnitureDatas = GetSessionDataManager().getAllFurnitureData({
+				loadFurnitureData: null,
+			});
 
-            if(!furnitureDatas || !furnitureDatas.length) return;
+			if (!furnitureDatas || !furnitureDatas.length) return;
 
-            const foundFurniture: IFurnitureData[] = [];
-            const foundFurniLines: string[] = [];
+			const foundFurniture: IFurnitureData[] = [];
+			const foundFurniLines: string[] = [];
 
-            for(const furniture of furnitureDatas)
-            {
-                if((currentType === CatalogType.BUILDER) && !furniture.availableForBuildersClub) continue;
+			for (const furniture of furnitureDatas) {
+				if (
+					currentType === CatalogType.BUILDER &&
+					!furniture.availableForBuildersClub
+				)
+					continue;
 
-                if((currentType === CatalogType.NORMAL) && furniture.excludeDynamic) continue;
+				if (
+					currentType === CatalogType.NORMAL &&
+					furniture.excludeDynamic
+				)
+					continue;
 
-                const searchValues = [ furniture.className, furniture.name, furniture.description ].join(' ').replace(/ /gi, '').toLowerCase();
+				const searchValues = [
+					furniture.className,
+					furniture.name,
+					furniture.description,
+				]
+					.join(" ")
+					.replace(/ /gi, "")
+					.toLowerCase();
 
-                if((currentType === CatalogType.BUILDER) && (furniture.purchaseOfferId === -1) && (furniture.rentOfferId === -1))
-                {
-                    // if((furniture.furniLine !== '') && (foundFurniLines.indexOf(furniture.furniLine) < 0))
-                    // {
-                    //    if(searchValues.indexOf(search) >= 0) foundFurniLines.push(furniture.furniLine);
-                    // }
-                }
-                else
-                {
-                    const foundNodes = [
-                        ...GetOfferNodes(offersToNodes, furniture.purchaseOfferId),
-                        ...GetOfferNodes(offersToNodes, furniture.rentOfferId)
-                    ];
+				if (
+					currentType === CatalogType.BUILDER &&
+					furniture.purchaseOfferId === -1 &&
+					furniture.rentOfferId === -1
+				) {
+					// if((furniture.furniLine !== '') && (foundFurniLines.indexOf(furniture.furniLine) < 0))
+					// {
+					//    if(searchValues.indexOf(search) >= 0) foundFurniLines.push(furniture.furniLine);
+					// }
+				} else {
+					const foundNodes = [
+						...GetOfferNodes(
+							offersToNodes,
+							furniture.purchaseOfferId
+						),
+						...GetOfferNodes(offersToNodes, furniture.rentOfferId),
+					];
 
-                    if(foundNodes.length)
-                    {
-                        if(searchValues.indexOf(search) >= 0) foundFurniture.push(furniture);
+					if (foundNodes.length) {
+						if (searchValues.indexOf(search) >= 0)
+							foundFurniture.push(furniture);
 
-                        if(foundFurniture.length === 250) break;
-                    }
-                }
-            }
+						if (foundFurniture.length === 250) break;
+					}
+				}
+			}
 
-            const offers: IPurchasableOffer[] = [];
+			const offers: IPurchasableOffer[] = [];
 
-            for(const furniture of foundFurniture) offers.push(new FurnitureOffer(furniture));
+			for (const furniture of foundFurniture)
+				offers.push(new FurnitureOffer(furniture));
 
-            let nodes: ICatalogNode[] = [];
+			let nodes: ICatalogNode[] = [];
 
-            FilterCatalogNode(search, foundFurniLines, rootNode, nodes);
+			FilterCatalogNode(search, foundFurniLines, rootNode, nodes);
 
-            setSearchResult(new SearchResult(search, offers, nodes.filter(node => (node.isVisible))));
-            setCurrentPage((new CatalogPage(-1, 'default_3x3', new PageLocalization([], []), offers, false, 1) as ICatalogPage));
-        }, 300);
+			setSearchResult(
+				new SearchResult(
+					search,
+					offers,
+					nodes.filter((node) => node.isVisible)
+				)
+			);
+			setCurrentPage(
+				new CatalogPage(
+					-1,
+					"default_3x3",
+					new PageLocalization([], []),
+					offers,
+					false,
+					1
+				) as ICatalogPage
+			);
+		}, 300);
 
-        return () => clearTimeout(timeout);
-    }, [ offersToNodes, currentType, rootNode, searchValue, setCurrentPage, setSearchResult ]);
+		return () => clearTimeout(timeout);
+	}, [
+		offersToNodes,
+		currentType,
+		rootNode,
+		searchValue,
+		setCurrentPage,
+		setSearchResult,
+	]);
 
-    return (
-        <Flex gap={ 1 }>
-            <Flex fullWidth alignItems="center" position="relative">
-                <input type="text" className="form-control form-control-sm" placeholder={ LocalizeText('generic.search') } value={ searchValue } onChange={ event => setSearchValue(event.target.value) } />
-            </Flex>
-            { (!searchValue || !searchValue.length) &&
-                <Button variant="primary" className="catalog-search-button">
-                    <FaSearch className="fa-icon" />
-                </Button> }
-            { searchValue && !!searchValue.length &&
-                <Button variant="primary" className="catalog-search-button" onClick={ event => setSearchValue('') }>
-                    <FaTimes className="fa-icon" />
-                </Button> }
-        </Flex>
-    );
-}
+	return (
+		<Flex gap={1}>
+			<Flex fullWidth alignItems="center" position="relative">
+				<input
+					type="text"
+					className="form-control form-control-sm"
+					placeholder={LocalizeText("generic.search")}
+					value={searchValue}
+					onChange={(event) => setSearchValue(event.target.value)}
+				/>
+			</Flex>
+			{(!searchValue || !searchValue.length) && (
+				<Button variant="primary">
+					<FaSearch className="fa-icon" />
+				</Button>
+			)}
+			{searchValue && !!searchValue.length && (
+				<Button
+					variant="primary"
+					onClick={(event) => setSearchValue("")}
+				>
+					<FaTimes className="fa-icon" />
+				</Button>
+			)}
+		</Flex>
+	);
+};

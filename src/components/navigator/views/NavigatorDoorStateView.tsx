@@ -1,110 +1,191 @@
-import { FC, useEffect, useState } from 'react';
-import { CreateRoomSession, DoorStateType, GoToDesktop, LocalizeText } from '../../../api';
-import { Button, Column, Flex, NitroCardContentView, NitroCardHeaderView, NitroCardView, Text } from '../../../common';
-import { useNavigator } from '../../../hooks';
+import { FC, useEffect, useState } from "react";
+import {
+	CreateRoomSession,
+	DoorStateType,
+	GoToDesktop,
+	LocalizeText,
+} from "../../../api";
+import {
+	Button,
+	Column,
+	Flex,
+	NitroCardContentView,
+	NitroCardHeaderView,
+	NitroCardView,
+	Text,
+} from "../../../common";
+import { useNavigator } from "../../../hooks";
 
-const VISIBLE_STATES = [ DoorStateType.START_DOORBELL, DoorStateType.STATE_WAITING, DoorStateType.STATE_NO_ANSWER, DoorStateType.START_PASSWORD, DoorStateType.STATE_WRONG_PASSWORD ];
-const DOORBELL_STATES = [ DoorStateType.START_DOORBELL, DoorStateType.STATE_WAITING, DoorStateType.STATE_NO_ANSWER ];
-const PASSWORD_STATES = [ DoorStateType.START_PASSWORD, DoorStateType.STATE_WRONG_PASSWORD ];
+const VISIBLE_STATES = [
+	DoorStateType.START_DOORBELL,
+	DoorStateType.STATE_WAITING,
+	DoorStateType.STATE_NO_ANSWER,
+	DoorStateType.START_PASSWORD,
+	DoorStateType.STATE_WRONG_PASSWORD,
+];
+const DOORBELL_STATES = [
+	DoorStateType.START_DOORBELL,
+	DoorStateType.STATE_WAITING,
+	DoorStateType.STATE_NO_ANSWER,
+];
+const PASSWORD_STATES = [
+	DoorStateType.START_PASSWORD,
+	DoorStateType.STATE_WRONG_PASSWORD,
+];
 
-export const NavigatorDoorStateView: FC<{}> = props =>
-{
-    const [ password, setPassword ] = useState('');
-    const { doorData = null, setDoorData = null } = useNavigator();
+export const NavigatorDoorStateView: FC<{}> = (props) => {
+	const [password, setPassword] = useState("");
+	const { doorData = null, setDoorData = null } = useNavigator();
 
-    const onClose = () =>
-    {
-        if(doorData && (doorData.state === DoorStateType.STATE_WAITING)) GoToDesktop();
+	const onClose = () => {
+		if (doorData && doorData.state === DoorStateType.STATE_WAITING)
+			GoToDesktop();
 
-        setDoorData(null);
-    }
+		setDoorData(null);
+	};
 
-    const ring = () =>
-    {
-        if(!doorData || !doorData.roomInfo) return;
+	const ring = () => {
+		if (!doorData || !doorData.roomInfo) return;
 
-        CreateRoomSession(doorData.roomInfo.roomId);
-        
-        setDoorData(prevValue =>
-        {
-            const newValue = { ...prevValue };
+		CreateRoomSession(doorData.roomInfo.roomId);
 
-            newValue.state = DoorStateType.STATE_PENDING_SERVER;
+		setDoorData((prevValue) => {
+			const newValue = { ...prevValue };
 
-            return newValue;
-        });
-    }
+			newValue.state = DoorStateType.STATE_PENDING_SERVER;
 
-    const tryEntering = () =>
-    {
-        if(!doorData || !doorData.roomInfo) return;
+			return newValue;
+		});
+	};
 
-        CreateRoomSession(doorData.roomInfo.roomId, password);
+	const tryEntering = () => {
+		if (!doorData || !doorData.roomInfo) return;
 
-        setDoorData(prevValue =>
-        {
-            const newValue = { ...prevValue };
+		CreateRoomSession(doorData.roomInfo.roomId, password);
 
-            newValue.state = DoorStateType.STATE_PENDING_SERVER;
+		setDoorData((prevValue) => {
+			const newValue = { ...prevValue };
 
-            return newValue;
-        });
-    }
+			newValue.state = DoorStateType.STATE_PENDING_SERVER;
 
-    useEffect(() =>
-    {
-        if(!doorData || (doorData.state !== DoorStateType.STATE_NO_ANSWER)) return;
+			return newValue;
+		});
+	};
 
-        GoToDesktop();
-    }, [ doorData ]);
+	useEffect(() => {
+		if (!doorData || doorData.state !== DoorStateType.STATE_NO_ANSWER)
+			return;
 
-    if(!doorData || (doorData.state === DoorStateType.NONE) || (VISIBLE_STATES.indexOf(doorData.state) === -1)) return null;
+		GoToDesktop();
+	}, [doorData]);
 
-    const isDoorbell = (DOORBELL_STATES.indexOf(doorData.state) >= 0);
+	if (
+		!doorData ||
+		doorData.state === DoorStateType.NONE ||
+		VISIBLE_STATES.indexOf(doorData.state) === -1
+	)
+		return null;
 
-    return (
-        <NitroCardView className="nitro-navigator-doorbell" theme="primary">
-            <NitroCardHeaderView headerText={ LocalizeText(isDoorbell ? 'navigator.doorbell.title' : 'navigator.password.title') } onCloseClick={ onClose } />
-            <NitroCardContentView className="px-3 pb-4">
-                <Column gap={ 1 }>
-                    <Text small bold>{ doorData && doorData.roomInfo && doorData.roomInfo.roomName }</Text>
-                    { (doorData.state === DoorStateType.START_DOORBELL) &&
-                        <Text small>{ LocalizeText('navigator.doorbell.info') }</Text> }
-                    { (doorData.state === DoorStateType.STATE_WAITING) &&
-                        <Text small>{ LocalizeText('navigator.doorbell.waiting') }</Text> }
-                    { (doorData.state === DoorStateType.STATE_NO_ANSWER) &&
-                        <Text small>{ LocalizeText('navigator.doorbell.no.answer') }</Text> }
-                    { (doorData.state === DoorStateType.START_PASSWORD) &&
-                        <Text small>{ LocalizeText('navigator.password.info') }</Text> }
-                    { (doorData.state === DoorStateType.STATE_WRONG_PASSWORD) &&
-                        <Text small>{ LocalizeText('navigator.password.retryinfo') }</Text> }
-                </Column>
-                { isDoorbell &&
-                    <Flex fullWidth gap={ 1 } className="align-items-end mt-auto pt-3">
-                        <Text small className="cursor-pointer" underline onClick={ onClose }>
-                            { LocalizeText('generic.cancel') }
-                        </Text>
-                        { (doorData.state === DoorStateType.START_DOORBELL) &&
-                            <Button className="ms-auto" onClick={ ring }>
-                                { LocalizeText('navigator.doorbell.button.ring') }
-                            </Button> }
-                    </Flex> }
-                { !isDoorbell &&
-                    <>
-                        <Flex className="pt-3 align-items-center" gap={ 1 }>
-                            <Text small fullWidth>{ LocalizeText('navigator.password.enter') }</Text>
-                            <input type="password" className="form-control form-control-sm" onChange={ event => setPassword(event.target.value) } />
-                        </Flex>
-                        <Flex fullWidth gap={ 1 } className="align-items-end mt-auto pt-3">
-                            <Text small className="cursor-pointer" underline onClick={ onClose }>
-                                { LocalizeText('generic.cancel') }
-                            </Text>
-                            <Button className="ms-auto" onClick={ tryEntering }>
-                                { LocalizeText('navigator.password.button.try') }
-                            </Button>
-                        </Flex>
-                    </> }
-            </NitroCardContentView>
-        </NitroCardView>
-    );
-}
+	const isDoorbell = DOORBELL_STATES.indexOf(doorData.state) >= 0;
+
+	return (
+		<NitroCardView className="nitro-navigator-doorbell" theme="primary">
+			<NitroCardHeaderView
+				headerText={LocalizeText(
+					isDoorbell
+						? "navigator.doorbell.title"
+						: "navigator.password.title"
+				)}
+				onCloseClick={onClose}
+			/>
+			<NitroCardContentView className="px-3 pb-4">
+				<Column gap={1}>
+					<Text small bold>
+						{doorData &&
+							doorData.roomInfo &&
+							doorData.roomInfo.roomName}
+					</Text>
+					{doorData.state === DoorStateType.START_DOORBELL && (
+						<Text small>
+							{LocalizeText("navigator.doorbell.info")}
+						</Text>
+					)}
+					{doorData.state === DoorStateType.STATE_WAITING && (
+						<Text small>
+							{LocalizeText("navigator.doorbell.waiting")}
+						</Text>
+					)}
+					{doorData.state === DoorStateType.STATE_NO_ANSWER && (
+						<Text small>
+							{LocalizeText("navigator.doorbell.no.answer")}
+						</Text>
+					)}
+					{doorData.state === DoorStateType.START_PASSWORD && (
+						<Text small>
+							{LocalizeText("navigator.password.info")}
+						</Text>
+					)}
+					{doorData.state === DoorStateType.STATE_WRONG_PASSWORD && (
+						<Text small>
+							{LocalizeText("navigator.password.retryinfo")}
+						</Text>
+					)}
+				</Column>
+				{isDoorbell && (
+					<Flex
+						fullWidth
+						gap={1}
+						className="align-items-end mt-auto pt-3"
+					>
+						<Text
+							small
+							className="cursor-pointer"
+							underline
+							onClick={onClose}
+						>
+							{LocalizeText("generic.cancel")}
+						</Text>
+						{doorData.state === DoorStateType.START_DOORBELL && (
+							<Button onClick={ring}>
+								{LocalizeText("navigator.doorbell.button.ring")}
+							</Button>
+						)}
+					</Flex>
+				)}
+				{!isDoorbell && (
+					<>
+						<Flex className="pt-3 align-items-center" gap={1}>
+							<Text small fullWidth>
+								{LocalizeText("navigator.password.enter")}
+							</Text>
+							<input
+								type="password"
+								className="form-control form-control-sm"
+								onChange={(event) =>
+									setPassword(event.target.value)
+								}
+							/>
+						</Flex>
+						<Flex
+							fullWidth
+							gap={1}
+							className="align-items-end mt-auto pt-3"
+						>
+							<Text
+								small
+								className="cursor-pointer"
+								underline
+								onClick={onClose}
+							>
+								{LocalizeText("generic.cancel")}
+							</Text>
+							<Button onClick={tryEntering}>
+								{LocalizeText("navigator.password.button.try")}
+							</Button>
+						</Flex>
+					</>
+				)}
+			</NitroCardContentView>
+		</NitroCardView>
+	);
+};
