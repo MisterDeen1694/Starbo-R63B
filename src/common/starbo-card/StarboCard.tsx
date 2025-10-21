@@ -46,9 +46,6 @@ const CardBase: FC<CardProps> = ({
 	children,
 }) => {
 	const base = "starbo-card";
-	const variants = {
-		primary: "primary",
-	};
 	const style: React.CSSProperties = {
 		width: `${width}px`,
 		height: `${height}px`,
@@ -81,7 +78,10 @@ const CardBase: FC<CardProps> = ({
 
 	//clone children and pass down the actions to the header
 	const enhancedChildren = React.Children.map(children, (child) => {
-		if (React.isValidElement(child) && child.type === CardHeader) {
+		if (
+			React.isValidElement(child) &&
+			(child.type as any)?.displayName === "StarboCard.Header"
+		) {
 			return React.cloneElement(child, { onReport, onClose, onInfo });
 		}
 		return child;
@@ -94,10 +94,7 @@ const CardBase: FC<CardProps> = ({
 			windowPosition={cardPosition}
 			disableDrag={disableDrag}
 		>
-			<div
-				className={clsx(base, variants[variant], uniqueKey)}
-				style={style}
-			>
+			<div className={clsx(base, variant, uniqueKey)} style={style}>
 				{enhancedChildren}
 			</div>
 		</DraggableWindow>
@@ -106,17 +103,14 @@ const CardBase: FC<CardProps> = ({
 
 // Sub components
 const CardHeader: FC<{
-	color?: string;
+	color?: "primary" | "secondary" | "tertiary" | "quaternary" | "quinary";
 	children: ReactNode;
 	onReport?;
 	onInfo?;
 	onClose?;
 }> = ({ color = "primary", children, onInfo, onClose, onReport }) => {
-	const colors = {
-		primary: "color-primary",
-	};
 	return (
-		<div className={clsx("header drag-handler", colors[color])}>
+		<div className={clsx("header drag-handler", `color-${color}`)}>
 			<h2>{children}</h2>
 			<div className="actions">
 				{onInfo && <button onClick={onInfo} className="info"></button>}
@@ -130,6 +124,7 @@ const CardHeader: FC<{
 		</div>
 	);
 };
+CardHeader.displayName = "StarboCard.Header";
 
 const CardBody: FC<{ children: ReactNode; columns?: boolean }> = ({
 	children,

@@ -61,6 +61,22 @@
 	--card-header-background: rgb(54, 120, 151);
 	--card-header-border: rgb(64, 140, 175);
 }
+.header.color-secondary {
+	--card-header-background: rgb(86, 139, 164);
+	--card-header-border: rgb(102, 162, 190);
+}
+.header.color-tertiary {
+	--card-header-background: rgb(215, 154, 51);
+	--card-header-border: rgb(255, 180, 59);
+}
+.header.color-quaternary {
+	--card-header-background: rgb(71, 72, 73);
+	--card-header-border: rgb(84, 84, 84);
+}
+.header.color-quinary {
+	--card-header-background: rgb(35, 35, 36);
+	--card-header-border: rgb(41, 41, 41);
+}
 
 .starbo-card {
 	&.primary {
