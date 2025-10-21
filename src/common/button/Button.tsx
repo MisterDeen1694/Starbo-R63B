@@ -2,7 +2,7 @@ import clsx from "clsx";
 import { CSSProperties, FC, ReactNode, useMemo } from "react";
 
 export interface ButtonProps {
-	variant?: "primary";
+	variant?: "primary" | "secondary";
 	width?: "full" | "auto" | number;
 	height?: "small" | "medium" | "large" | number;
 	shadow?: boolean;
@@ -27,7 +27,7 @@ export const Button: FC<ButtonProps> = ({
 }) => {
 	const style: React.CSSProperties = {
 		width: typeof width === "number" && `${width}px`,
-		height: typeof height === "number" && `${width}px`,
+		height: typeof height === "number" && `${height}px`,
 	};
 	return (
 		<button

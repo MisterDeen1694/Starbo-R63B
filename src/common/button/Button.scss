@@ -2,6 +2,7 @@
 	box-sizing: content-box;
 	cursor: pointer;
 	display: flex;
+	align-items: center;
 	&.primary {
 		border-radius: 2px;
 		outline: 1px solid black;
@@ -24,6 +25,33 @@
 		&:disabled {
 			background: rgba(203, 203, 203, 173);
 			--disabled: rgba(67, 67, 67, 173);
+		}
+	}
+
+	&.secondary {
+		border-radius: 2px;
+		outline: 1px solid black;
+		margin: 1px 2px 2px 1px;
+		@include ui-gradient(rgb(0, 149, 0), rgb(0, 133, 0));
+		border: 1px solid rgb(0, 133, 0);
+		padding: 0;
+		@include ubuntu(bold);
+		text-align: center;
+		justify-content: center;
+		color: rgb(255, 255, 255);
+
+		&:not(:disabled):hover {
+			@include ui-gradient(rgb(0, 157, 0), rgb(0, 145, 0));
+			border: 1px solid rgb(0, 157, 0);
+		}
+		&:not(:disabled):active {
+			@include ui-gradient(rgb(0, 139, 0), rgb(0, 102, 0));
+			border: 1px solid rgb(0, 102, 0);
+		}
+		&:disabled {
+			background: rgb(40, 136, 39);
+			outline: none;
+			--disabled: rgb(40, 136, 39);
 		}
 	}
 
