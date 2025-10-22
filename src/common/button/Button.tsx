@@ -2,7 +2,8 @@ import clsx from "clsx";
 import { CSSProperties, FC, ReactNode, useMemo } from "react";
 
 export interface ButtonProps {
-	variant?: "primary" | "secondary";
+	variant?: "primary";
+	color?: "primary" | "secondary" | "tertiary" | "quaternary" | "quinary";
 	width?: "full" | "auto" | number;
 	height?: "small" | "medium" | "large" | number;
 	shadow?: boolean;
@@ -17,6 +18,7 @@ export interface ButtonProps {
 export const Button: FC<ButtonProps> = ({
 	children,
 	variant = "primary",
+	color = "primary",
 	width = "auto",
 	height = "medium",
 	shadow = false,
@@ -37,6 +39,7 @@ export const Button: FC<ButtonProps> = ({
 			className={clsx(
 				"starbo-button",
 				variant,
+				"color-" + color,
 				typeof width !== "number" && "w-" + width,
 				typeof height !== "number" && "h-" + height,
 				shadow && "shadow",

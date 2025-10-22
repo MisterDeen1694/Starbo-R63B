@@ -3,55 +3,143 @@
 	cursor: pointer;
 	display: flex;
 	align-items: center;
-	&.primary {
-		border-radius: 2px;
-		outline: 1px solid black;
-		margin: 1px 2px 2px 1px;
-		@include ui-gradient(rgb(243, 243, 243), rgb(217, 217, 217));
-		border: 1px solid rgb(217, 217, 217);
-		padding: 0;
-		@include ubuntu(bold);
-		text-align: center;
-		justify-content: center;
 
-		&:not(:disabled):hover {
-			@include ui-gradient(rgb(255, 255, 255), rgb(243, 243, 243));
-			border: 1px solid rgb(255, 255, 255);
-		}
-		&:not(:disabled):active {
-			@include ui-gradient(rgb(225, 225, 225), rgb(163, 163, 163));
-			border: 1px solid rgb(163, 163, 163);
+	&.color-primary {
+		--button-background-top: rgb(243, 243, 243);
+		--button-background-bottom: rgb(217, 217, 217);
+		--button-background-border: rgb(217, 217, 217);
+		--button-text: rgb(0, 0, 0);
+		&:not(:disabled) {
+			&:hover {
+				--button-background-top: rgb(255, 255, 255);
+				--button-background-bottom: rgb(243, 243, 243);
+				--button-background-border: rgb(255, 255, 255);
+			}
+
+			&:active {
+				--button-background-top: rgb(225, 225, 225);
+				--button-background-bottom: rgb(163, 163, 163);
+				--button-background-border: rgb(163, 163, 163);
+			}
 		}
 		&:disabled {
-			background: rgba(203, 203, 203, 173);
-			--disabled: rgba(67, 67, 67, 173);
+			--button-background: rgba(203, 203, 203, 173);
+			--button-background-border-disabled: rgba(67, 67, 67, 173);
 		}
 	}
 
-	&.secondary {
+	&.color-secondary {
+		--button-background-top: rgb(0, 149, 0);
+		--button-background-bottom: rgb(0, 133, 0);
+		--button-background-border: rgb(0, 133, 0);
+		--button-text: rgb(255, 255, 255);
+		&:not(:disabled) {
+			&:hover {
+				--button-background-top: rgb(0, 157, 0);
+				--button-background-bottom: rgb(0, 145, 0);
+				--button-background-border: rgb(0, 157, 0);
+			}
+
+			&:active {
+				--button-background-top: rgb(0, 139, 0);
+				--button-background-bottom: rgb(0, 102, 0);
+				--button-background-border: rgb(0, 102, 0);
+			}
+		}
+		&:disabled {
+			--button-background: rgb(40, 136, 39);
+			--button-background-border-disabled: rgb(40, 136, 39);
+		}
+	}
+
+	&.color-tertiary {
+		--button-background-top: rgb(209, 152, 0);
+		--button-background-bottom: rgb(187, 136, 0);
+		--button-background-border: rgb(187, 136, 0);
+		--button-text: rgb(255, 255, 255);
+		&:not(:disabled) {
+			&:hover {
+				--button-background-top: rgb(220, 160, 0);
+				--button-background-bottom: rgb(202, 147, 0);
+				--button-background-border: rgb(202, 147, 0);
+			}
+
+			&:active {
+				--button-background-top: rgb(194, 139, 3);
+				--button-background-bottom: rgb(141, 101, 0);
+				--button-background-border: rgb(141, 101, 0);
+			}
+		}
+		&:disabled {
+			--button-background: rgb(173, 139, 46);
+			--button-background-border-disabled: rgb(110, 93, 46);
+		}
+	}
+	&.color-quaternary {
+		--button-background-top: rgb(9, 147, 186);
+		--button-background-bottom: rgb(18, 131, 166);
+		--button-background-border: rgb(18, 131, 166);
+		--button-text: rgb(255, 255, 255);
+		&:not(:disabled) {
+			&:hover {
+				--button-background-top: rgb(9, 154, 196);
+				--button-background-bottom: rgb(9, 142, 180);
+				--button-background-border: rgb(9, 154, 196);
+			}
+
+			&:active {
+				--button-background-top: rgb(5, 137, 174);
+				--button-background-bottom: rgb(2, 99, 127);
+				--button-background-border: rgb(2, 99, 127);
+			}
+		}
+		&:disabled {
+			--button-background: rgb(53, 135, 157);
+			--button-background-border-disabled: rgb(50, 91, 101);
+		}
+	}
+	&.color-quinary {
+		--button-background-top: rgb(193, 193, 193);
+		--button-background-bottom: rgb(172, 172, 172);
+		--button-background-border: rgb(172, 172, 172);
+		--button-text: rgb(0, 0, 0);
+		&:not(:disabled) {
+			&:hover {
+				--button-background-top: rgb(203, 203, 203);
+				--button-background-bottom: rgb(189, 189, 189);
+				--button-background-border: rgb(203, 203, 203);
+			}
+
+			&:active {
+				--button-background-top: rgb(179, 179, 179);
+				--button-background-bottom: rgb(129, 129, 129);
+				--button-background-border: rgb(129, 129, 129);
+			}
+		}
+		&:disabled {
+			--button-background: rgb(179, 179, 179);
+			--button-background-border-disabled: rgb(129, 129, 129);
+		}
+	}
+
+	&.primary {
+		color: var(--button-text);
 		border-radius: 2px;
 		outline: 1px solid black;
 		margin: 1px 2px 2px 1px;
-		@include ui-gradient(rgb(0, 149, 0), rgb(0, 133, 0));
-		border: 1px solid rgb(0, 133, 0);
+		@include ui-gradient(
+			var(--button-background-top),
+			var(--button-background-bottom)
+		);
+		border: 1px solid var(--button-background-border);
 		padding: 0;
 		@include ubuntu(bold);
 		text-align: center;
 		justify-content: center;
-		color: rgb(255, 255, 255);
-
-		&:not(:disabled):hover {
-			@include ui-gradient(rgb(0, 157, 0), rgb(0, 145, 0));
-			border: 1px solid rgb(0, 157, 0);
-		}
-		&:not(:disabled):active {
-			@include ui-gradient(rgb(0, 139, 0), rgb(0, 102, 0));
-			border: 1px solid rgb(0, 102, 0);
-		}
 		&:disabled {
-			background: rgb(40, 136, 39);
-			outline: none;
-			--disabled: rgb(40, 136, 39);
+			cursor: default;
+			outline: 0;
+			background: var(--button-background);
 		}
 	}
 
@@ -77,15 +165,18 @@
 	}
 
 	&.shadow {
-		box-shadow: 1px 1px 0px 1px var(--disabled, black);
+		box-shadow: 1px 1px 0px 1px
+			var(--button-background-border-disabled, black);
 	}
 
 	&.outline {
-		box-shadow: 0px 0px 0px 2px var(--disabled, black);
+		box-shadow: 0px 0px 0px 2px
+			var(--button-background-border-disabled, black);
 
 		&.shadow {
-			box-shadow: 0px 0px 0px 2px var(--disabled, black),
-				0px 1px 0px 2px var(--disabled, black);
+			box-shadow: 0px 0px 0px 2px
+					var(--button-background-border-disabled, black),
+				0px 1px 0px 2px var(--button-background-border-disabled, black);
 		}
 	}
 
