@@ -17,7 +17,7 @@ export * from "./HorizontalRule";
 export * from "./InfiniteScroll";
 export * from "./layout";
 export * from "./layout/limited-edition";
-export * from "./Slider";
+export * from "./slider/Slider";
 export * from "./Text";
 export * from "./types";
 export * from "./utils";

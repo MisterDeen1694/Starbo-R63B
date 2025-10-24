@@ -14,18 +14,10 @@ import {
 	LocalizeText,
 	SendMessageComposer,
 } from "../../../api";
-import {
-	Button,
-	Column,
-	Flex,
-	LayoutCurrencyIcon,
-	LayoutImage,
-	NitroCardContentView,
-	NitroCardHeaderView,
-	NitroCardView,
-	Text,
-} from "../../../common";
+import { Button, StarboCard } from "../../../common";
+const { Header, Body, Content } = StarboCard;
 import { useMessageEvent, useNotification } from "../../../hooks";
+import clsx from "clsx";
 
 export interface CameraWidgetCheckoutViewProps {
 	base64Url: string;
@@ -167,79 +159,62 @@ export const CameraWidgetCheckoutView: FC<CameraWidgetCheckoutViewProps> = (
 	}, [base64Url]);
 
 	if (!price) return null;
-
+	const isLoading = !pictureUrl || !pictureUrl.length;
 	return (
-		<NitroCardView className="nitro-camera-checkout" theme="primary-slim">
-			<NitroCardHeaderView
-				headerText={LocalizeText("camera.confirm_phase.title")}
-				onCloseClick={(event) => processAction("close")}
-			/>
-			<NitroCardContentView>
-				<Flex center>
-					{pictureUrl && pictureUrl.length && (
-						<LayoutImage
-							className="picture-preview border"
-							imageUrl={pictureUrl}
-						/>
-					)}
-					{(!pictureUrl || !pictureUrl.length) && (
-						<Flex center className="picture-preview border">
-							<Text bold>{LocalizeText("camera.loading")}</Text>
-						</Flex>
-					)}
-				</Flex>
-				<Flex
-					justifyContent="between"
-					alignItems="center"
-					className="bg-muted rounded p-2"
-				>
-					<Column size={publishDisabled ? 10 : 6} gap={1}>
-						<Text bold>
-							{LocalizeText("camera.purchase.header")}
-						</Text>
-						{(price.credits > 0 || price.duckets > 0) && (
-							<Flex gap={1}>
-								<Text>
-									{LocalizeText(
-										"catalog.purchase.confirmation.dialog.cost"
+		<StarboCard
+			width={338}
+			uniqueKey="camera-checkout"
+			onClose={() => processAction("close")}
+		>
+			<Header color="quaternary">
+				{LocalizeText("camera.confirm_phase.title")}
+			</Header>
+			<Body>
+				<Content>
+					<div className={clsx("preview", isLoading && "loading")}>
+						{isLoading ? (
+							<p>{LocalizeText("camera.loading")}</p>
+						) : (
+							<img src={pictureUrl} />
+						)}
+					</div>
+					<p className="ready-text">
+						{LocalizeText(
+							(!isLoading &&
+								picturesBought > 0 &&
+								"camera.purchase.successful") ||
+								(!isLoading &&
+									!wasPicturePublished &&
+									"camera.confirm_phase.info") ||
+								(!isLoading &&
+									wasPicturePublished &&
+									"camera.publish.successful") ||
+								(isLoading && "camera.purchase.pleasewait")
+						)}
+					</p>
+					<div className="action-box">
+						<div>
+							<h3>{LocalizeText("camera.purchase.header")}</h3>
+							<p>
+								{LocalizeText(
+									"catalog.purchase.confirmation.dialog.cost"
+								) + " "}
+								<span
+									className={clsx(
+										price.credits > 0 && "credits",
+										price.duckets > 0 && "duckets"
 									)}
-								</Text>
-								{price.credits > 0 && (
-									<Flex gap={1}>
-										<Text bold>{price.credits}</Text>
-										<LayoutCurrencyIcon type={-1} />
-									</Flex>
-								)}
-								{price.duckets > 0 && (
-									<Flex gap={1}>
-										<Text bold>{price.duckets}</Text>
-										<LayoutCurrencyIcon type={5} />
-									</Flex>
-								)}
-							</Flex>
-						)}
-						{picturesBought > 0 && (
-							<Text>
-								<Text bold>
-									{LocalizeText("camera.purchase.count.info")}
-								</Text>{" "}
-								{picturesBought}
-								<u
-									className="ms-1 cursor-pointer"
-									onClick={() =>
-										CreateLinkEvent("inventory/toggle")
-									}
 								>
-									{LocalizeText("camera.open.inventory")}
-								</u>
-							</Text>
-						)}
-					</Column>
-					<Flex alignItems="center">
+									{(price.credits > 0 && price.credits) ||
+										(price.duckets > 0 && price.duckets)}
+								</span>
+							</p>
+						</div>
 						<Button
-							variant="primary"
-							disabled={isWaiting}
-							onClick={(event) => processAction("buy")}
+							color="secondary"
+							onClick={() => processAction("buy")}
+							width={106}
+							height={22}
 						>
 							{LocalizeText(
 								!picturesBought
@@ -247,90 +222,99 @@ export const CameraWidgetCheckoutView: FC<CameraWidgetCheckoutViewProps> = (
 									: "camera.buy.another.button.text"
 							)}
 						</Button>
-					</Flex>
-				</Flex>
-				{!publishDisabled && (
-					<Flex
-						justifyContent="between"
-						alignItems="center"
-						className="bg-muted rounded p-2"
-					>
-						<Column gap={1}>
-							<Text bold>
-								{LocalizeText(
-									wasPicturePublished
-										? "camera.publish.successful"
-										: "camera.publish.explanation"
-								)}
-							</Text>
-							<Text>
-								{LocalizeText(
-									wasPicturePublished
-										? "camera.publish.success.short.info"
-										: "camera.publish.detailed.explanation"
-								)}
-							</Text>
-							{wasPicturePublished && (
-								<a
-									href={publishUrl}
-									rel="noreferrer"
-									target="_blank"
-								>
-									{LocalizeText("camera.link.to.published")}
-								</a>
-							)}
-							{!wasPicturePublished &&
-								price.publishDucketPrice > 0 && (
-									<Flex gap={1}>
-										<Text>
-											{LocalizeText(
-												"catalog.purchase.confirmation.dialog.cost"
-											)}
-										</Text>
-										<Flex gap={1}>
-											<Text bold>
-												{price.publishDucketPrice}
-											</Text>
-											<LayoutCurrencyIcon type={5} />
-										</Flex>
-									</Flex>
-								)}
-							{publishCooldown > 0 && (
-								<div className="mt-1 text-center fw-bold">
-									{LocalizeText(
-										"camera.publish.wait",
-										["minutes"],
-										[
-											Math.ceil(
-												publishCooldown / 60
-											).toString(),
-										]
-									)}
-								</div>
-							)}
-						</Column>
-						{!wasPicturePublished && (
-							<Flex className="d-flex align-items-end">
-								<Button
-									variant="primary"
-									disabled={isWaiting || publishCooldown > 0}
-									onClick={(event) =>
-										processAction("publish")
+						{picturesBought > 0 && (
+							<p className="bought">
+								{LocalizeText("camera.purchase.count.info")}{" "}
+								<span>{picturesBought}</span>{" "}
+								<u
+									onClick={() =>
+										CreateLinkEvent("inventory/toggle")
 									}
+								>
+									{LocalizeText("camera.open.inventory")}
+								</u>
+							</p>
+						)}
+					</div>
+					<div className="action-box">
+						{!wasPicturePublished && (
+							<>
+								<div>
+									<h3>
+										{LocalizeText(
+											"camera.publish.explanation"
+										)}
+									</h3>
+									<p>
+										{LocalizeText(
+											"camera.publish.detailed.explanation"
+										)}
+									</p>
+									<p>
+										{LocalizeText(
+											"catalog.purchase.confirmation.dialog.cost"
+										)}{" "}
+										<span
+											className={clsx(
+												price.credits > 0 && "credits",
+												price.duckets > 0 && "duckets"
+											)}
+										>
+											{(price.credits > 0 &&
+												price.credits) ||
+												(price.duckets > 0 &&
+													price.duckets)}
+										</span>
+									</p>
+								</div>
+								<Button
+									color="secondary"
+									onClick={() => processAction("publish")}
+									width={106}
+									height={22}
 								>
 									{LocalizeText("camera.publish.button.text")}
 								</Button>
-							</Flex>
+							</>
 						)}
-					</Flex>
-				)}
-				<Text center>{LocalizeText("camera.warning.disclaimer")}</Text>
-				<Flex justifyContent="end">
-					<Button onClick={(event) => processAction("cancel")}>
-						{LocalizeText("generic.cancel")}
+						{wasPicturePublished && (
+							<>
+								<div>
+									<h3>
+										{LocalizeText(
+											"camera.publish.successful"
+										)}
+									</h3>
+									<p>
+										{LocalizeText(
+											"camera.publish.success.short.info"
+										)}
+									</p>
+									<a href={publishUrl} target="_blank">
+										{LocalizeText(
+											"camera.link.to.published"
+										)}
+									</a>
+								</div>
+							</>
+						)}
+					</div>
+					<p className="disclaimer">
+						{LocalizeText("camera.warning.disclaimer")}
+					</p>
+					<Button
+						width={106}
+						height={22}
+						onClick={() => processAction("cancel")}
+					>
+						{LocalizeText(
+							picturesBought < 1 && !wasPicturePublished
+								? "generic.cancel"
+								: "generic.close"
+						)}
 					</Button>
-				</Flex>
-			</NitroCardContentView>
-		</NitroCardView>
+				</Content>
+			</Body>
+		</StarboCard>
 	);
 };

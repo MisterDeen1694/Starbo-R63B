@@ -1,9 +1,7 @@
-$cell-size: 40px;
-
 // mixin: sprite($row, $col, $sheet)
-@mixin sprite($row, $col, $sheet) {
-	$x: ($col - 1) * -$cell-size;
-	$y: ($row - 1) * -$cell-size;
+@mixin sprite($row, $col, $sheet, $size: 40px) {
+	$x: ($col - 1) * -$size;
+	$y: ($row - 1) * -$size;
 
 	display: inline-block;
 	background-repeat: no-repeat;

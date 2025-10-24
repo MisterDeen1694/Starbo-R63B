@@ -1,6 +1,5 @@
 import { NitroRectangle, TextureUtils } from "@nitrots/nitro-renderer";
 import { FC, useRef } from "react";
-import { FaTimes } from "react-icons/fa";
 import {
 	CameraPicture,
 	CreateLinkEvent,
@@ -10,8 +9,9 @@ import {
 	PlaySound,
 	SoundNames,
 } from "../../../api";
-import { Column, DraggableWindowCamera, Flex, Button } from "../../../common";
+import { Button, DraggableWindowCamera } from "../../../common";
 import { useCamera, useNotification } from "../../../hooks";
+import clsx from "clsx";
 
 export interface CameraWidgetCaptureViewProps {
 	onClose: () => void;
@@ -65,9 +65,15 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = (
 		const clone = [...cameraRoll];
 
 		if (clone.length >= CAMERA_ROLL_LIMIT) {
-			simpleAlert(LocalizeText("camera.full.body"));
+			simpleAlert(
+				LocalizeText("camera.full.body"),
+				null,
+				null,
+				null,
+				LocalizeText("camera.full.header")
+			);
 
-			clone.pop();
+			clone.shift();
 		}
 
 		PlaySound(SoundNames.CAMERA_SHUTTER);
@@ -77,140 +83,87 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = (
 
 		setCameraRoll(clone);
 	};
+	const deletePicture = () => {
+		onDelete();
+		setTimeout(() => setSelectedPictureIndex(-1), 0);
+	};
 
 	return (
-		<>
-			<DraggableWindowCamera uniqueKey="camera-capture">
-				{selectedPicture && (
-					<img className="preview" src={selectedPicture.imageUrl} />
-				)}
-				<div className="card  drag-handler">
-					<div className="header">
-						<h2>{LocalizeText("camera.interface.title")}</h2>
+		<DraggableWindowCamera uniqueKey="camera-capture">
+			{selectedPicture && (
+				<img className="preview" src={selectedPicture.imageUrl} />
+			)}
+			<div className="card  drag-handler">
+				<div className="header">
+					<h2>{LocalizeText("camera.interface.title")}</h2>
+					<div className="actions">
 						<div className="actions">
-							<div className="actions">
-								<button
-									onClick={() =>
-										CreateLinkEvent(
-											"habbopages/help/camera"
-										)
-									}
-									className="info"
-								></button>
-
-								<button
-									onClick={onClose}
-									className="close"
-								></button>
-							</div>
+							<button
+								onClick={() =>
+									CreateLinkEvent("habbopages/help/camera")
+								}
+								className="info"
+							></button>
+							<button
+								onClick={onClose}
+								className="close"
+							></button>
 						</div>
 					</div>
-					{!selectedPicture && <div className="lens"></div>}
-					{selectedPicture && (
-						<div className="edit">
+				</div>
+				{!selectedPicture && (
+					<div className="lens-active" ref={elementRef}></div>
+				)}
+				{selectedPicture && (
+					<div className="lens">
+						<div className="actions">
 							<Button
 								title={LocalizeText(
 									"camera.editor.button.tooltip"
 								)}
 								variant="primary"
-								shadow
+								color="secondary"
+								outline
 								width={49}
+								height={35}
 								onClick={onEdit}
 							>
 								{LocalizeText("camera.editor.button.text")}
 							</Button>
 						</div>
-					)}
-					<button
-						title={LocalizeText("camera.take.photo.button.tooltip")}
-						className="capture"
-						onClick={takePicture}
-					/>
-				</div>
-			</DraggableWindowCamera>
-			<DraggableWindowCamera uniqueKey="nitro-camera-capture">
-				<Column center className="nitro-camera-capture" gap={0}>
-					{selectedPicture && (
-						<img
-							alt=""
-							className="camera-area"
-							src={selectedPicture.imageUrl}
-						/>
-					)}
-					<div className="camera-canvas drag-handler">
-						<div
-							className="position-absolute info-camera"
-							onClick={() => CreateLinkEvent("habbopages/camera")}
-						></div>
-						<div
-							className="position-absolute header-close"
-							onClick={onClose}
-						>
-							<FaTimes className="fa-icon" />
-						</div>
-						{!selectedPicture && (
-							<div
-								ref={elementRef}
-								className="camera-area camera-view-finder"
-							/>
-						)}
-						{selectedPicture && (
-							<div className="camera-area camera-frame">
-								<div className="camera-frame-preview-actions w-100 position-absolute bottom-0 py-2 text-center">
-									<button
-										className="btn btn-success me-3"
-										title={LocalizeText(
-											"camera.editor.button.tooltip"
-										)}
-										onClick={onEdit}
-									>
-										{LocalizeText(
-											"camera.editor.button.text"
-										)}
-									</button>
-									<button
-										className="btn btn-danger"
-										onClick={onDelete}
-									>
-										{LocalizeText(
-											"camera.delete.button.text"
-										)}
-									</button>
-								</div>
-							</div>
-						)}
-						<div className="d-flex justify-content-center">
-							<div
-								className="camera-button"
-								title={LocalizeText(
-									"camera.take.photo.button.tooltip"
-								)}
-								onClick={takePicture}
-							/>
-						</div>
 					</div>
-					{cameraRoll.length > 0 && (
-						<Flex
-							gap={2}
-							justifyContent="center"
-							className="camera-roll d-flex justify-content-center py-2"
+				)}
+				<button
+					title={LocalizeText("camera.take.photo.button.tooltip")}
+					className="capture"
+					onClick={takePicture}
+				/>
+				<div className="gallery">
+					{[...Array(5)].map((_, index) => (
+						<div
+							key={index}
+							className={clsx(
+								"photo",
+								index === selectedPictureIndex && "selected"
+							)}
+							onClick={() =>
+								cameraRoll[index] &&
+								setSelectedPictureIndex(index)
+							}
 						>
-							{cameraRoll.map((picture, index) => {
-								return (
-									<img
-										alt=""
-										key={index}
-										src={picture.imageUrl}
-										onClick={(event) =>
-											setSelectedPictureIndex(index)
-										}
-									/>
-								);
-							})}
-						</Flex>
-					)}
-				</Column>
-			</DraggableWindowCamera>
-		</>
+							{cameraRoll[index] && (
+								<img alt="" src={cameraRoll[index].imageUrl} />
+							)}
+							{index === selectedPictureIndex && (
+								<button
+									onClick={deletePicture}
+									className="delete"
+								/>
+							)}
+						</div>
+					))}
+				</div>
+			</div>
+		</DraggableWindowCamera>
 	);
 };

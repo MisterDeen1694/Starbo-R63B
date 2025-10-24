@@ -163,10 +163,12 @@
 		z-index: -1;
 	}
 
-	.card {
-		height: 464px;
+	& .card {
+		height: 533px;
 		width: 340px;
 		@include sprite(1, 1, "camera");
+		display: grid;
+		grid-template-rows: 33px 1fr 71px;
 		& .header {
 			height: 33px;
 			display: flex;
@@ -187,6 +189,20 @@
 		}
 
 		& .lens {
+			@extend %camera-lens-position;
+			& .actions {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				position: absolute;
+				bottom: 0;
+				width: 320px;
+				background-color: rgba(0, 0, 0, 0.5);
+				height: 58px;
+			}
+		}
+
+		& .lens-active {
 			@extend %camera-lens-position;
 			@include sprite(1, 10, "camera");
 		}
@@ -210,6 +226,445 @@
 			&:active {
 				@include sprite(9, 16, "camera");
 				display: grid;
+			}
+		}
+
+		& .gallery {
+			width: 326px;
+			height: 71px;
+			background-color: rgb(186, 184, 180);
+			border: 1px solid rgb(255, 255, 255);
+			border-top: unset;
+			box-shadow: 0px 1px 0px 1px rgb(0, 0, 0);
+			border-radius: 0 0 5px 5px;
+			display: grid;
+			justify-self: center;
+			grid-template-columns: repeat(5, 58px);
+			grid-template-rows: 58px;
+			align-content: center;
+			justify-content: center;
+			gap: 6px;
+
+			& .photo {
+				border: 1px solid rgb(0, 0, 0);
+				background-color: rgb(210, 210, 210);
+				cursor: pointer;
+				position: relative;
+				& img {
+					object-fit: contain;
+					width: 56px;
+					image-rendering: auto;
+				}
+				&.selected::after {
+					content: "";
+					position: absolute;
+					@include sprite(12, 12, "camera");
+					width: 62px;
+					height: 62px;
+					top: -2px;
+					left: -2px;
+				}
+
+				& .delete {
+					position: absolute;
+					top: -2px;
+					right: -2px;
+					@include sprite(1, 18, "camera");
+					width: 19px;
+					height: 21px;
+					border: unset;
+					background-color: unset;
+					z-index: 1;
+					cursor: pointer;
+				}
+			}
+		}
+	}
+}
+
+.camera-editor.starbo-card .body {
+	& .left {
+		margin-left: 11px;
+		& .sub-header {
+			transform: translateX(0px);
+			& .tabs {
+				border: unset;
+				height: 38px;
+				gap: 6px;
+				justify-content: center;
+				& .tab {
+					border-color: rgb(93, 93, 90);
+					border-bottom: unset;
+					width: 95px;
+					background-color: rgb(203, 203, 203);
+
+					&.active {
+						background-color: rgb(255, 255, 255);
+
+						&::before {
+							box-shadow: 0 0 0 2px rgb(0, 0, 0);
+						}
+					}
+					&::before {
+						inset: 2px 2px -2px;
+					}
+
+					& .colormatrix {
+						width: 32px;
+						height: 21px;
+						@include sprite(2, 18, "camera");
+					}
+
+					& .composite {
+						width: 32px;
+						height: 21px;
+						@include sprite(3, 18, "camera");
+					}
+				}
+			}
+		}
+
+		& .content {
+			margin-top: 1px;
+			height: 410px;
+			background: rgb(255, 255, 255);
+			border-radius: 6px;
+			width: 100%;
+			padding: 5px 5px 7px 7px;
+			& .effects {
+				padding-top: 2px;
+				display: grid;
+				grid-template-columns: repeat(3, 58px);
+				grid-auto-rows: 58px;
+				gap: 11px;
+				overflow: auto;
+				height: 393px;
+
+				& .effect {
+					background: unset;
+					padding: 0;
+					border: 1px solid black;
+					position: relative;
+					&:not(.locked) {
+						cursor: pointer;
+					}
+					&.locked::after {
+						content: "";
+						position: absolute;
+						top: -3px;
+						left: -1px;
+						@include sprite(12, 10, "camera");
+						width: 58px;
+						height: 60px;
+					}
+
+					& img {
+						object-fit: contain;
+						width: 56px;
+						image-rendering: auto;
+					}
+
+					&.selected::after {
+						content: "";
+						position: absolute;
+						@include sprite(12, 12, "camera");
+						width: 62px;
+						height: 62px;
+						top: -2px;
+						left: -2px;
+					}
+
+					& .delete {
+						position: absolute;
+						top: -2px;
+						right: -2px;
+						@include sprite(1, 18, "camera");
+						width: 19px;
+						height: 21px;
+						border: unset;
+						background-color: unset;
+						z-index: 1;
+						cursor: pointer;
+					}
+				}
+			}
+		}
+	}
+
+	& .right {
+		margin-top: 13px;
+		margin-right: 11px;
+		position: relative;
+		& .preview {
+			width: 320px;
+			height: 320px;
+			position: relative;
+			overflow: hidden;
+			& img {
+				width: 320px;
+				height: 320px;
+				object-fit: none;
+			}
+			.effect-slider {
+				height: 59px;
+				width: calc(100%);
+				padding-inline: 14px;
+				position: absolute;
+				bottom: 0;
+				left: 0;
+				background-color: rgba(0, 0, 0, 0.5);
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				& p {
+					@include ubuntu(bold);
+					font-size: 12px;
+					margin: 0;
+				}
+			}
+		}
+
+		& .actions-top {
+			display: flex;
+			width: 100%;
+			justify-content: end;
+			gap: 4px;
+			margin-top: 3px;
+
+			& button,
+			a {
+				border: unset;
+				background-color: rgb(198, 197, 190);
+				text-decoration: underline;
+				height: 24px;
+				width: 120px;
+				border-radius: 6px;
+				@include ubuntu(normal);
+				font-size: 11px;
+				align-items: center;
+				display: flex;
+				justify-content: center;
+				cursor: pointer;
+
+				&.save::before {
+					content: "";
+					width: 16px;
+					height: 16px;
+					margin-right: 5px;
+					@include sprite(5, 18, "camera");
+				}
+
+				&.zoom::before {
+					content: "";
+					width: 13px;
+					height: 22px;
+					margin-right: 5px;
+					@include sprite(4, 18, "camera");
+				}
+			}
+		}
+
+		& .actions-bottom {
+			display: flex;
+			width: 100%;
+			justify-content: end;
+			gap: 10px;
+			padding-top: 12px;
+			position: absolute;
+			bottom: 21px;
+			border-top: 1px solid rgb(0, 0, 0);
+
+			& .starbo-button:first-child {
+				@include ubuntu(normal);
+			}
+		}
+	}
+}
+
+.camera-checkout.starbo-card .body {
+	& .preview {
+		width: 320px;
+		height: 320px;
+		margin: 6px 7px 5px 7px;
+
+		&.loading {
+			background-color: rgb(204, 204, 204);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			& p {
+				@include ubuntu(normal);
+				font-size: 30px;
+			}
+		}
+	}
+	& .ready-text {
+		color: rgb(0, 0, 0);
+		@include ubuntu(normal);
+		margin-inline: 9px;
+		font-size: 13px;
+		margin-bottom: 0;
+	}
+
+	& .action-box {
+		background-color: rgb(198, 197, 190);
+		border-radius: 6px;
+		margin: 6px 11px 6px 7px;
+		color: rgb(0, 0, 0);
+		display: grid;
+		grid-template-columns: 1fr 108px;
+		padding: 0 8px 7px 10px;
+		& h3,
+		.bought {
+			@include ubuntu(500);
+			font-size: 15px;
+			padding-top: 3px;
+			margin-bottom: 3px;
+		}
+		& .bought {
+			grid-column: 1 / span 2;
+			display: ruby;
+			& span,
+			u {
+				@include ubuntu(normal);
+			}
+			& u {
+				font-size: 12px;
+			}
+		}
+
+		& p:not(:has(span)),
+		a {
+			font-size: 12px;
+			margin-bottom: 3px;
+			margin-top: -2px;
+			line-height: 13px;
+			margin-bottom: 6px;
+		}
+		& a {
+			text-decoration: underline;
+			cursor: pointer;
+		}
+		& p:has(span) {
+			display: flex;
+			gap: 4px;
+			margin-bottom: 0;
+			& span {
+				@include ubuntu(bold);
+				display: flex;
+				align-items: center;
+				gap: 4px;
+
+				&.credits::after {
+					content: "";
+					width: 22px;
+					height: 22px;
+					@include sprite(1, 2, "currency", 20px);
+				}
+
+				&.duckets::after {
+					content: "";
+					width: 19px;
+					height: 20px;
+					@include sprite(1, 4, "currency", 20px);
+				}
+			}
+		}
+
+		& button {
+			align-self: flex-end;
+			@include ubuntu(normal);
+			font-size: 12px;
+		}
+	}
+
+	& .disclaimer {
+		margin: 6px 11px 6px 7px;
+		@include ubuntu(normal);
+		font-size: 12px;
+		color: rgb(0, 0, 0);
+	}
+	& .starbo-button {
+		@include ubuntu(normal);
+		margin: 6px 11px 6px 7px;
+		font-size: 12px;
+	}
+}
+
+.camera-photo {
+	width: 490px;
+	height: 463px;
+	background-color: rgba(0, 0, 0, 0.65);
+	border-radius: 6px;
+	position: relative;
+
+	& .actions {
+		@extend %starbo-card-actions;
+	}
+
+	& .photo {
+		position: absolute;
+		top: 71px;
+		left: 84px;
+		width: 322px;
+
+		& .loading {
+			width: 322px;
+			height: 322px;
+			border: 1px solid rgb(0, 0, 0);
+			background-color: rgb(204, 204, 204);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			& p {
+				@include ubuntu(normal);
+				font-size: 30px;
+			}
+		}
+
+		& img {
+			border: 1px solid rgb(0, 0, 0);
+		}
+		& .details {
+			font-size: 12px;
+			display: flex;
+			justify-content: space-between;
+			padding-inline: 9px;
+			padding-block: 4px;
+			align-items: center;
+			& p {
+				margin: 0;
+			}
+
+			& button {
+				background: unset;
+				text-decoration: underline;
+				border: none;
+				color: rgb(255, 255, 255);
+				cursor: pointer;
+			}
+		}
+	}
+
+	& .skip {
+		position: absolute;
+		display: flex;
+		justify-content: space-between;
+		width: 470px;
+		height: 64px;
+		top: 200px;
+		left: 10px;
+
+		& button {
+			width: 64px;
+			height: 64px;
+			@include sprite(12, 15, "camera");
+			background-color: unset;
+			border: none;
+
+			&.previous {
+				transform: rotate(180deg);
 			}
 		}
 	}

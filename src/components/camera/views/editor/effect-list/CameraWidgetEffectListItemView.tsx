@@ -1,8 +1,7 @@
 import { IRoomCameraWidgetEffect } from "@nitrots/nitro-renderer";
 import { FC } from "react";
-import { FaLock, FaTimes } from "react-icons/fa";
 import { LocalizeText } from "../../../../../api";
-import { Button, LayoutGridItem, Text } from "../../../../../common";
+import clsx from "clsx";
 
 export interface CameraWidgetEffectListItemViewProps {
 	effect: IRoomCameraWidgetEffect;
@@ -26,33 +25,24 @@ export const CameraWidgetEffectListItemView: FC<
 	} = props;
 
 	return (
-		<LayoutGridItem
-			title={LocalizeText(
-				!isLocked
-					? `camera.effect.name.${effect.name}`
-					: `camera.effect.required.level ${effect.minLevel}`
+		<button
+			title={
+				isLocked
+					? LocalizeText("camera.effect.required.level") +
+					  effect.minLevel
+					: LocalizeText(`camera.effect.name.${effect.name}`)
+			}
+			className={clsx(
+				"effect",
+				isLocked && "locked",
+				isActive && "selected"
 			)}
-			itemActive={isActive}
-			onClick={(event) => !isActive && selectEffect()}
+			onClick={() => !isActive && !isLocked && selectEffect()}
 		>
-			{isActive && (
-				<Button variant="primary" onClick={removeEffect}>
-					<FaTimes className="fa-icon" />
-				</Button>
-			)}
 			{!isLocked && thumbnailUrl && thumbnailUrl.length > 0 && (
-				<div className="effect-thumbnail-image border">
-					<img alt="" src={thumbnailUrl} />
-				</div>
+				<img alt="" src={thumbnailUrl} />
 			)}
-			{isLocked && (
-				<Text center bold>
-					<div>
-						<FaLock className="fa-icon" />
-					</div>
-					{effect.minLevel}
-				</Text>
-			)}
-		</LayoutGridItem>
+			{isActive && <button onClick={removeEffect} className="delete" />}
+		</button>
 	);
 };

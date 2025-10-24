@@ -145,10 +145,11 @@ const CardSubheader: FC<{
 	children?: ReactNode;
 	width?: number | "full";
 	height: number;
-	color:
+	color?:
 		| `rgb(${string}, ${string}, ${string})`
-		| `rgba(${string}, ${string}, ${string}, ${string})`;
-}> = ({ children, width = "full", height, color }) => {
+		| `rgba(${string}, ${string}, ${string}, ${string})`
+		| "unset";
+}> = ({ children, width = "full", height, color = "unset" }) => {
 	const style: React.CSSProperties = {
 		width: width === "full" ? "calc(100% + 4px)" : `${width}px`,
 		height: `${height}px`,
